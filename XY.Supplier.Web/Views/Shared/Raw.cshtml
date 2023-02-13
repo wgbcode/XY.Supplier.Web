@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>@(ViewBag.Title ?? XY.Supplier.Web.Configs.SiteTitle)</title>
+
+    <link type="text/css" rel="stylesheet" href="/scripts/bootstrap4/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="/scripts/fontawesome/css/all.min.css" crossorigin="anonymous" />
+    <link type="text/css" rel="stylesheet" href="/scripts/layer/theme/default/layer.css" />
+    <link type="text/css" rel="stylesheet" href="/scripts/bootstrapSelect/css/bootstrap-select.css" />
+    <link type="text/css" rel="stylesheet" href="/styles/xy.min.css" />
+    <link type="text/css" rel="stylesheet" href="/styles/boss.min.css" />
+
+    <script type="text/javascript" src="/scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="/scripts/native.min.js"></script>
+</head>
+<body style="background-color:#ecf0f5;">
+    @RenderBody()
+
+    <script type="text/javascript">
+        //<![CDATA[
+
+        //执行服务端脚本
+        @Html.Raw(ViewBag.Javascript)
+
+        //]]>
+    </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+﻿@model XY.Supplier.Web.Models.My.Account_Model
+
+@{
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+
+<style>
+    .card {
+        min-width: 1000px;
+    }
+</style>
+
+<script type="text/javascript">
+    //<![CDATA[
+
+    require(['jquery', 'xyvalid', 'boss'], function ($, v, boss) {
+        $(function () {
+            var _form = $('form:first');
+            _form.xyvInit();
+        });
+    });
+
+    //]]>
+</script>
+
+<form method="post" action="">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header b">账户资料</div>
+            <div class="card-body">
+                <div class="row justify-content-center mt1r mb05r">
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">公司名称</div>
+                    <div class="col-xl-9 col-lg-9 col-md-9 col-xs-9 col-sm-9 col-9">@Model.SupplierInfo.name</div>
+                </div>
+                <div class="row justify-content-center mb05r">
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">软件名称</div>
+                    <div class="col-xl-9 col-lg-9 col-md-9 col-xs-9 col-sm-9 col-9">NEWARE WMS 供应商系统</div>
+                </div>
+                <div class="row justify-content-center mb1r">
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">软件版本</div>
+                    <div class="col-xl-9 col-lg-9 col-md-9 col-xs-9 col-sm-9 col-9">@(XY.Supplier.Web.Tools.Version)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

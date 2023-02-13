@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>xyvalid-demo</title>
+    <link type="text/css" rel="stylesheet" href="/styles/boss.min.css" />
+    <link type="text/css" rel="stylesheet" href="/styles/xy.min.css" />
+    <link type="text/css" rel="stylesheet" href="/scripts/bootstrap/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="/scripts/font-awesome/css/font-awesome.min.css" />
+    <script type="text/javascript" src="/scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="/scripts/xyvalid.min.js"></script>
+</head>
+<body>
+    <div class="fl w100p">
+        <div class="fl w20p">&nbsp;</div>
+
+        <div class="fl w80p">
+
+            <!--非空验证-->
+            <form id="form_required" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">非空验证</span><br />
+                    <input xy-required="true" xy-title="不允许为空" />
+                    <input type="submit" />
+                </div>
+                <script>
+                    var form_required = $('#form_required');
+                    form_required.xyvInit(true);
+                </script>
+            </form>
+
+            <!--安全验证-->
+            <form id="form_safe" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">安全验证</span><br />
+                    <input value="不含危险字符" />
+                    <input value="含危险字符<与>" />
+                    <input value="含危险字符<与>,但不验证" xy-unsafe="true" />
+                    <input type="submit" />
+                </div>
+                <script>
+                    var form_safe = $('#form_safe');
+                    form_safe.xyvInit(true);
+                </script>
+            </form>
+
+            <!--整型验证-->
+            <form id="form_int" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">整型验证</span><br />
+                    <input xy-required="true" xy-title="请输入1-9之间整数"
+                           type="number" step="1" xy-min="1" xy-max="9" />
+                    <input type="submit" />
+                </div>
+                <script>
+                    var form_int = $('#form_int');
+                    form_int.xyvInit(true);
+                </script>
+            </form>
+
+            <!--浮点型验证-->
+            <form id="form_float" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">浮点型验证</span><br />
+                    <input xy-required="true" xy-title="请输入1.01-1.09之间值"
+                           type="number" step="0.01" xy-min="1.01" xy-max="1.09" />
+                    <input type="submit" />
+                </div>
+                <script>
+                    var form_float = $('#form_float');
+                    form_float.xyvInit(true);
+                </script>
+            </form>
+
+            <!--控件值必须大于等于另一控件值-->
+            <form id="form_geq" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">控件值必须大于等于另一控件值</span><br />
+                    <input id="geq_1" xy-required="true" xy-title="请输入0.00-9.99之间值"
+                           type="number" step="0.01" xy-min="0.00" xy-max="9.99" />
+                    <input id="geq_2" xy-required="true" xy-title="请输入0.00-9.99之间值"
+                           type="number" step="0.01" xy-min="0.00" xy-max="9.99" xy-geq-id="geq_1" />
+                    <input type="submit" />
+                </div>
+                <script>
+                    var form_geq = $('#form_geq');
+                    form_geq.xyvInit(true);
+                </script>
+            </form>
+
+            <!--EMAIL验证-->
+            <form id="form_email" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">EMAIL验证</span><br />
+                    <input xy-required="true" xy-title="请输入EMAIL"
+                           type="email" />
+                    <input type="submit" />
+                </div>
+                <script>
+                    var form_email = $('#form_email');
+                    form_email.xyvInit(true);
+                </script>
+            </form>
+
+            <!--不相等验证-->
+            <form id="form_not" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">不相等验证</span><br />
+                    <select xy-not="1" xy-title="不能选择1">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                    <input type="submit" />
+                </div>
+                <script>
+                    var form_not = $('#form_not');
+                    form_not.xyvInit(true);
+                </script>
+            </form>
+
+            <!--相同值验证-->
+            <form id="form_same" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">相同值验证（通常用于密码确认）</span><br />
+                    <input id="same1" xy-required="true" xy-title="请输入值1" />
+                    <input xy-same="same1" xy-title="值1与值2输入不一致" />
+                    <input type="submit" />
+                </div>
+                <script>
+                    var form_same = $('#form_same');
+                    form_same.xyvInit(true);
+                </script>
+            </form>
+
+            <!--自定义正则表达式验证-->
+            <form id="form_pattern" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">自定义正则表达式验证</span><br />
+                    <input xy-pattern="^[0-9]{4,16}$" xy-title="请输入4-16位数字" />
+                    <input type="submit" />
+                </div>
+                <script>
+                    var form_pattern = $('#form_pattern');
+                    form_pattern.xyvInit(true);
+                </script>
+            </form>
+
+            <!--自定义函数验证-->
+            <form id="form_func" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">自定义函数验证</span><br />
+                    <input id="my_func_id" xy-func="my_func()" />
+                    <input id="submit_func" type="button" value="提交" />
+                </div>
+                <script>
+
+                    function my_func() {
+                        if ($('#my_func_id').val().length == 0) {
+                            alert('请输入控件值！');
+                            $('#my_func_id').focus();
+                            return false;
+                        }
+                        return true;
+                    }
+
+                    var form_func = $('#form_func');
+                    form_func.xyvInit(false);
+                    $('#submit_func').on('click', function () {
+                        if (form_func.xyvValid()) {
+                            form_rel.submit();
+                        }
+                    });
+                </script>
+            </form>
+
+            <!--关联验证-->
+            <form id="form_rel" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">关联验证</span><br />
+                    <select id="rel_switch">
+                        <option value="1">验证</option>
+                        <option value="2">不验证</option>
+                        <option value="3">验证</option>
+                    </select>
+                    <input xy-required="true" xy-title="不允许为空"
+                           xy-rel-id="rel_switch" xy-rel-reg="^1|3$" />
+                    <input id="submit_rel" type="button" value="提交" />
+                </div>
+                <script>
+                    var form_rel = $('#form_rel');
+                    form_rel.xyvInit(false);
+                    $('#submit_rel').on('click', function () {
+                        if (form_rel.xyvValid()) {
+                            form_rel.submit();
+                        }
+                    });
+                </script>
+            </form>
+
+            <!--手动验证-->
+            <form id="form_manual" class="fl w100p mb10">
+                <div class="fl w100p">
+                    <span class="fz14 b">手动验证</span><br />
+                    <input xy-required="true" xy-title="请输入1-9之间整数"
+                           type="number" step="1" xy-min="1" xy-max="9" placeholder="请输入1-9之间整数" />
+                    <input type="button" value="提交" />
+                </div>
+                <script>
+                    var form_manual = $('#form_manual');
+                    form_manual.xyvInit(false);
+                    $(function () {
+                        form_manual.find('input[type=button]').first().on('click', function () {
+                            if (form_manual.xyvValid()) {
+                                form_manual.submit();
+                            }
+                        });
+                    });
+                </script>
+            </form>
+
+        </div>
+    </div>
+</body>
+</html>

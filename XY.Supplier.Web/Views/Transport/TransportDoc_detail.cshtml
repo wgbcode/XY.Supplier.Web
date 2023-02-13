@@ -1,0 +1,1450 @@
+﻿@using System.Data
+@model XY.Supplier.Web.Models.Transport.TransportDoc_View_Model
+
+@{
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+
+<style>
+    .clearfix:after {
+        content: "";
+        display: block;
+        visibility: hidden;
+        clear: both;
+    }
+
+    .left {
+        float: left;
+    }
+
+    .right {
+        float: right;
+    }
+
+    .card {
+        border-color: transparent;
+    }
+
+    .card-header {
+        background-color: #fff;
+        padding: 0.35rem 1rem;
+    }
+
+    .card-header.center {
+        text-align: center;
+    }
+
+    .card-header.center::before {
+        display: none;
+    }
+
+    .trans-receipt {
+        padding-left: 6rem;
+        padding-right: 6rem;
+        position: relative;
+    }
+
+    .line {
+        width: 1px;
+        height: 14rem;
+        background-color: #dedede;
+        position: absolute;
+        top: 4.8rem;
+        left: 33.2%;
+    }
+
+    .line-two {
+        left: 63.6%;
+    }
+
+    .info-title {
+        font-weight: 600;
+        font-size: 1.025rem;
+        color: #222;
+    }
+
+    .oneLine {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .table-box {
+        padding: 0 4rem 1.5rem;
+    }
+
+    .top-c {
+        margin-top: 4px;
+    }
+
+    .top-c .date {
+        display: inline-block;
+        width: 30px;
+        margin: 0 3px;
+        text-align: right;
+    }
+
+    .top-c .date:first-child {
+        margin-left: 20px;
+    }
+
+    .table-c {
+        border: 1px solid #dedede;
+        border-width: 1px 0 0 1px;
+        margin-top: 5px;
+        line-height: 30px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .tr-c {
+        display: flex;
+        width: 100%;
+        min-height: 30px;
+    }
+
+    .td-c {
+        border: 1px solid #dedede;
+        border-width: 0 1px 1px 0;
+        padding: 0 5px;
+    }
+
+    .td-c.count {
+        display: flex;
+        padding: 0 5rem;
+    }
+
+    .td-c.count .count-item {
+        flex: 1;
+    }
+
+    .count-item .unit {
+        margin-left: 6px;
+    }
+
+    .label {
+        background-color: #dedede;
+        border-color: #d8d8d8;
+    }
+
+    .flex {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+    }
+
+    .flex1 {
+        flex: 1;
+    }
+
+    .ta-l {
+        text-align: left;
+    }
+
+    .trans-type {
+        flex-wrap: wrap;
+        padding: 1rem;
+        justify-content: space-between;
+    }
+
+    .trans-type .trans-check {
+        width: 50%;
+        display: flex;
+        align-items: center;
+    }
+
+    .trans-input {
+        margin-right: 5px !important;
+        margin-top: 7px !important;
+        width: 14px !important;
+    }
+
+    @*第二版*@
+    .box-item {
+        padding-right: 20px;
+        padding-left: 23px;
+        margin-bottom: 15px;
+        background-color: #fff;
+        border-radius: 4px;
+        min-width: 1600px;
+    }
+
+    .header-line {
+        position: relative;
+        font-size: .75rem;
+        border-bottom: 1px solid #fff;
+        line-height: 2rem;
+    }
+
+    .header-line .title {
+        font-size: .875rem;
+        font-weight: 700;
+    }
+
+    @*.header-line .title::before {
+        content: '';
+        display: inline-block;
+        width: 4px;
+        height: 1.125rem;
+        background-color: #f1b720;
+        margin: 0 15px -4px -23px;
+        border-radius: 2px;
+    }*@
+
+    .header-line img {
+        vertical-align: middle;
+        margin-top: -5px;
+        cursor: pointer;
+        margin-left: 3px;
+    }
+
+    .header-line .fa {
+        line-height: 30px;
+        font-size: 1.125rem;
+    }
+
+    .bigger {
+        font-size: .875rem;
+        font-style: normal;
+    }
+
+    .bigger.index {
+        font-size: 1rem;
+        color: #909399;
+    }
+
+    .header-line .arr-info {
+        position: absolute;
+        left: -19px;
+    }
+    
+    .steps {
+        display: flex;
+    }
+
+    .steps .step {
+        display: flex;
+        align-items: center;
+        color: #a4a4a4;
+    }
+
+    .steps .step .item {
+        text-align: center;
+        padding: 0 .5rem;
+        @*width: 7.15rem;*@
+    }
+
+    .steps .step .item .operation {
+        text-align: center;
+        font-size: 0.875rem;
+    }
+    
+    .steps .step .item .operation.reject {
+        color: #eb5451;
+    }
+
+    .steps .step .item .operate-time {
+        color: rgba(0, 0, 0, 0.5);
+        transform: scale(0.83333);
+    }
+
+    .steps .step.done {
+        color: #3ec085;
+    }
+
+    .steps .step:first-child .step-line {
+        display: none;
+    }
+
+    .step .step-line {
+        position: relative;
+        height: 1px;
+        width: 7.125rem;
+        background-color: #bdbfc2;
+        @*margin: 0 .5rem;*@
+    }
+
+    .steps .step.done .item {
+        padding: 0;
+    }
+
+    .step .step-line .duration {
+        color: rgba(0, 0, 0, 0.9);
+        position: absolute;
+        left: 6px;
+        top: -18px;
+        transform: scale(0.83333);
+    }
+    
+    .step .step-line .operator {
+        position: absolute;
+        left: 6px;
+        top: 0px;
+        color: rgba(0, 0, 0, 0.5);
+        transform: scale(0.83333);
+        margin-left: -3px;
+    }
+
+    .fa {
+        font-size: 16px;
+        color: #f1b720;
+        cursor: pointer;
+    }
+    tbody .fa {
+        color: #f4c759;
+        font-size: 14px;
+    }
+
+    .btns {
+        display: flex;
+        justify-content: center;
+        padding-bottom: 40px;
+    }
+
+    .rotate180 {
+        transform: rotate(180deg);
+        transition: all .1s linear;
+    }
+
+    .rotate90 {
+        transform: rotate(90deg);
+        transition: all .1s linear;
+    }
+
+    .rotate0 {
+        transform: rotate(0deg);
+        transition: all .1s linear;
+    }
+
+    .trans-receipt {
+        border-top: 1px solid #e9e9e9;
+    }
+
+    .layui-layer-btn0 {
+        font-size: .75rem !important;
+        border-color: #489cf2 !important;
+        background-color: #489cf2 !important;
+        color: #fff !important;
+    }
+
+    .modal-info {
+        padding-left: 2rem!important;
+        padding-right: 2rem!important;
+    }
+
+    .modal-info .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .modal-info .row>div:first-child {
+        width: 6.5rem;
+        flex-shrink: 0;
+    }
+    .btns button {
+        border-radius: 3px;
+    }
+
+</style>
+
+<script type="text/javascript">
+
+    require(['jquery', 'xy', 'xyvalid', 'boss', 'layer', 'bootstrapSelect'], function ($, xy, v, boss, layer, bootstrapSelect) {
+        $(function () {
+
+            function getQueryVariable(variable) {
+                var query = window.location.search.substring(1);
+                var vars = query.split("&");
+                for (var i = 0; i < vars.length; i++) {
+                    var pair = vars[i].split("=");
+                    if (pair[0] == variable) { return pair[1]; }
+
+                }
+                return (false);
+            }
+
+            // 保存
+            $('#Submit').on('click', function () {
+                var obj = [];
+                if ('@Model.transportDocDetailList.Count'>0) {
+                    var goodsArr = $(".goods");
+                    var itemNumberArr = $(".itemNumber");
+                    var packingTypeArr = $(".packingType");
+                    var volumeArr = $(".volume");
+                    var weightArr = $(".weight");
+                    var piecesArr = $(".pieces");
+
+                    for (var i = 0; i < goodsArr.length; i++) {
+                        //if (itemNumberArr[i].value.trim().length == "") {
+                        //    layer.msg("请填写完整货物对应的编号信息", { time: 2000 });
+                        //    return;
+                        //}
+                        //if (packingTypeArr[i].value.trim().length == "") {
+                        //    layer.msg("请填写完整货物对应的包装信息", { time: 2000 });
+                        //    return;
+                        //}
+                        ////var flag = false;
+                        ////if (volumeArr[i].value.trim().length != "") {
+                        ////    if (volumeArr[i].value.trim() == 0) {
+                        ////        layer.msg("体积不能为0！", { time: 2000 });
+                        ////        return;
+                        ////    }
+                        ////    if (!isnum(volumeArr[i].value.trim())) {
+                        ////        layer.msg("体积应为数值类型！", { time: 2000 });
+                        ////        return;
+                        ////    } else {
+                        ////        flag = true;
+                        ////    }
+                        ////}
+                        ////if (weightArr[i].value.trim().length != "") {
+                        ////    if (weightArr[i].value.trim()==0) {
+                        ////        layer.msg("重量不能为0！", { time: 2000 });
+                        ////        return;
+                        ////    }
+                        ////    if (!isnum(weightArr[i].value.trim())) {
+                        ////        layer.msg("重量应为数值类型！", { time: 2000 });
+                        ////        return;
+                        ////    } else {
+                        ////        flag = true;
+                        ////    }
+                        ////}
+                        ////if (!flag) {
+                        //    layer.msg("体积和重量不能同时为空！", { time: 2000 });
+                        //    return;
+                        //}
+
+                        obj[i] = {
+                            goods: goodsArr[i].value, item_number: itemNumberArr[i].value, packingType: packingTypeArr[i].value,
+                            volume: volumeArr[i].value, weight: weightArr[i].value, pieces: piecesArr[i].value
+                        }
+                    }
+                }
+
+                var DeliveryFee = $('#DeliveryFee').val();
+                var ForkliftFee = $('#ForkliftFee').val();
+                var PackagingFee = $('#PackagingFee').val();
+                var PickupFee = $('#PickupFee').val();
+                var Insurance = $('#Insurance').val();
+                var FreightFee = $('#FreightFee').val();
+
+                var DischarGecargoFee = $('#DischarGecargoFee').val();
+                var WaitFee = $('#WaitFee').val();
+                var WarehousingFee = $('#WarehousingFee').val();
+                var CabinetInstallationFee = $('#CabinetInstallationFee').val();
+                var ReturnWithGoodsFee = $('#ReturnWithGoodsFee').val();
+                var UpstairsFee = $('#UpstairsFee').val();
+                var OvernightChargeFee = $('#OvernightChargeFee').val();
+
+                var modeOfTransport = $('input:radio[name="trans-type"]:checked').val();
+                //if (!parseInt(ConsignmentQuantity) || parseInt(ConsignmentQuantity)<0) {
+                //    layer.msg("托运数量必须为大于0的整数！");
+                //    return;
+                //})
+                $.ajax({
+                    type: "post",
+                    url: "/Transport/TransportDoc_Detail_Update",
+                    data: {
+                        TransportDocID: getQueryVariable("transportDocID"),
+                        DeliveryFee: DeliveryFee,
+                        ForkliftFee: ForkliftFee,
+                        PackagingFee: PackagingFee,
+                        PickupFee: PickupFee,
+                        Insurance: Insurance,
+                        FreightFee: FreightFee,
+                        transportDocDetailList: obj,
+                        DischarGecargoFee: DischarGecargoFee,
+                        WaitFee: WaitFee,
+                        WarehousingFee: WarehousingFee,
+                        CabinetInstallationFee: CabinetInstallationFee,
+                        ReturnWithGoodsFee: ReturnWithGoodsFee,
+                        UpstairsFee: UpstairsFee,
+                        OvernightChargeFee: OvernightChargeFee,
+                        ModeOfTransport:modeOfTransport
+                    },
+                    async: false,
+                    dataType: "json",
+                    beforeSend: function () {
+                        $("#Submit").attr("disable", true);
+                    },
+                    success: function (res) {
+                        data = JSON.parse(res)
+                        if (data.code == 0) {
+                            alert("修改成功!")
+                            location.reload()
+                        } else {
+                            alert(data.message)
+                        }
+                        $("#Submit").attr("disable", false);
+                    }
+                })
+            });
+            //点击返回
+            $('#Cancel').on('click', function () {
+                boss.load('@Html.Raw(Model.Backurl)');
+            });
+
+            @*第二版*@
+            @*表格展开与隐藏*@
+            $('table').delegate('.table-arrow', "click", function () {
+                if ($(this).hasClass("rotate0")) {
+                    $(this).removeClass("rotate0").addClass("rotate90");
+                    $(this).parent().parent().parent().next().fadeToggle();
+                } else {
+                    $(this).removeClass("rotate90").addClass("rotate0");
+                    $(this).parent().parent().parent().next().fadeToggle();
+                }
+            })
+
+            @*子表显示与隐藏*@
+            $('table').delegate('.subtable-arrow', "click", function () {
+                if ($(this).hasClass("rotate0")) {
+                    $(this).removeClass("rotate0").addClass("rotate90");
+                    $(this).parent().parent().next().fadeToggle();
+                } else {
+                    $(this).removeClass("rotate90").addClass("rotate0");
+                    $(this).parent().parent().next().fadeToggle();
+                }
+            })
+
+            function toggleItem(el_arr, el_item) {
+                $(el_arr).on("click", function () {
+                    if ($(this).hasClass("rotate90")) {
+                        $(this).removeClass("rotate90").addClass("rotate180");
+                        $(el_item).slideToggle()
+                    } else {
+                        $(this).removeClass("rotate180").addClass("rotate90");
+                        $(el_item).slideToggle()
+                    }
+                })
+            }
+
+            @*企业信息展开与隐藏*@
+            toggleItem('.info-arrow', '#entInfo')
+
+            @* 物流单详情展开与隐藏 *@
+            toggleItem('.trans-arrow', '#transDetail-ele')
+
+            @*点击信息详情按钮*@
+            $(".detail-icon").on("click", function () {
+                var title = $(this).prev().text()
+                var modalTitle = ''
+                var modalContent = ''
+                var content3 = `
+                <div id="entInfo" class="card-body trans-receipt modal-info">
+                    <div class="row mt035r mb05r">
+                        <div class="color_bf">收件公司</div>
+                        <div class="w80p oneLine" title="@(Model.ConsigneeCompany)">@(Model.ConsigneeCompany)</div>
+                    </div>
+                    <div class="row mb05r">
+                        <div class="color_bf">收件地址</div>
+                        <div class="w80p oneLine" title="@(Model.ConsigneeAddress)">@(Model.ConsigneeAddress)</div>
+                    </div>
+                    <div class="row mb05r">
+                        <div class="color_bf">收件人</div>
+                        <div class="w80p oneLine">@(Model.Consignee)</div>
+                    </div>
+                    <div class="row mb05r">
+                        <div class="color_bf">收件人联系电话</div>
+                        <div class="w80p oneLine">@(Model.ConsigneeTel)</div>
+                    </div>
+                </div>`
+                var content2 = `
+                    <div id="entInfo"class="card-body trans-receipt modal-info">
+                        <div class="row mt035r mb05r">
+                            <div class="color_bf">物流公司</div>
+                            <div class="w80p oneLine">@(Model.CardNname)</div>
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf pr-0">物流公司业务代码</div>
+                            <div class="w80p oneLine">@(Model.CardCode)</div>
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf">物流公司地址</div>
+                            <div class="w80p oneLine" title="@(Model.Address)">@(Model.Address)</div>
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf">联系人</div>
+                            <div class="w80p oneLine">@(Model.CntctCode)</div>
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf">付款条件</div>
+                            <div class="w80p oneLine">@(Model.PymntGroup)</div>@*- 现金基础 -*@
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf">付款方式</div>
+                            <div class="w80p oneLine">@(Model.PaymentMethod)</div>
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf">发票类型</div>
+                            <div class="w80p oneLine">@(Model.UFPLB)</div>
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf">税率</div>
+                            <div class="w80p oneLine">@(Model.U_SL)</div>
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf">快递单号</div>
+                            <div class="w80p oneLine">@(Model.CourierNumber)</div>
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf">预付款日期</div>
+                            <div class="w80p oneLine">@(Model.PrepaDay)</div>
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf">收款账号</div>
+                            <div class="w80p oneLine">@(Model.UACCT)</div>
+                        </div>
+                        <div class="row mb05r">
+                            <div class="color_bf">开户行</div>
+                            <div class="w80p oneLine">@(Model.UBANK)</div>
+                        </div>
+                    </div>`
+                var content1 = `<div id="entInfo" class="card-body trans-receipt modal-info">
+                    <div class="row mb05r mt035r">
+                        <div class="color_bf">发货主体</div>
+                        <div class="w80p oneLine">@(Model.OidcCode)</div>
+                    </div>
+                    <div class="row mb05r">
+                        <div class="color_bf">发货地址</div>
+                        <div class="w80p oneLine" title="@(Model.ConsignorAddress)">@(Model.ConsignorAddress)</div>
+                    </div>
+                    <div class="row mb05r">
+                        <div class="color_bf">采购单号</div>
+                        <div class="w80p oneLine">@(Model.TransportDocOrder.Replace("PO-",""))</div>
+                    </div>
+                    <div class="row mb05r">
+                        <div class="color_bf">订单状态</div>
+                        <div class="w80p oneLine">@(Model.Status)</div>
+                    </div>
+                    <div class="row mb05r">
+                        <div class="color_bf">过账日期</div>
+                        <div class="w80p oneLine">@(Model.DocDate.ToString("yyyy.MM.dd"))</div>
+                    </div>
+                    <div class="row mb05r">
+                        <div class="color_bf">交货日期</div>
+                        <div class="w80p oneLine">@(Model.DocDueDate.ToString("yyyy.MM.dd"))</div>
+                    </div>
+                    <div class="row mb05r">
+                        <div class="color_bf">销售员</div>
+                        <div class="w80p oneLine">@(Model.SlpName)</div>
+                    </div>
+                    <div class="row mb05r">
+                        <div class="color_bf">备注</div>
+                        <div class="w80p oneLine" title="@(Model.Comments)">@(Model.Comments)</div>
+                    </div>
+                </div >`
+                if (title == "发货主体") {
+                    modalTitle = "寄件公司信息"
+                    modalContent = content1
+                } else if (title == "业务伙伴") {
+                    modalTitle = "业务伙伴信息"
+                    modalContent = content2
+
+                } else if (title == "收件公司") {
+                    modalTitle = "收件公司信息"
+                    modalContent = content3
+                }
+                layer.open({
+                    type: 1,
+                    title: modalTitle,
+                    offset: "100px",
+                    area: "640px",
+                    id: 'layerDemo', //防止重复弹出,
+                    content: modalContent,
+                    @*btn: "关闭",
+                    closeBtn: 0,*@
+                    btnAlign: 'c', //按钮居中,
+                    shade: 0.3, //不显示遮罩,
+                    @*yes: function () {
+                        layer.closeAll();
+                    }*@
+                });
+            })
+
+            @*查看电子版物流单*@
+            $("#trans-detail").on("click", function () {
+                var modalContent = $("#transDetail-ele")
+                layer.open({
+                    type: 1,
+                    title: '物流单详情',
+                    offset: "100px",
+                    area: "1312px",
+                    id: 'layerDemo', //防止重复弹出,
+                    content: modalContent,
+                    @*btn: "关闭",
+                    closeBtn: 0,*@
+                    btnAlign: 'c', //按钮居中,
+                    shade: 0.3, //不显示遮罩,
+                    @*yes: function () {
+                        layer.closeAll();
+                    }*@
+                });
+            })
+
+            // 数字转为千分位，并保留两个小数位
+            function numberFilter(oldNum, isFixed) { // 例（123456.78）
+                if (oldNum === "") return {};
+                let newNum = oldNum.toLocaleString("en-US");
+                const numArr = newNum.split(".");
+                if (!isFixed) {
+                    if (!numArr[1]) { // 如果数组没有下标1的元素，就加.00，例：123,456 = 123,456.00
+                        newNum = newNum + ".00";
+                    } else if (numArr[1].length === 1) { // 如果数组下标1的元素只有一位小数，就加个0，例：123,456.7 = 123,456.70
+                        newNum = newNum + "0";
+                    } else if (numArr[1].length >= 2) { // // 如果数组下标1的元素小数位大于等于2位，就截取前两位，例：123,456.789 = 123,456.78
+                        newNum = numArr[0] + "." + numArr[1].substr(0, 2);
+                    }
+                }
+                return newNum;
+            }
+
+            var sheet = `
+                <div class="tr-c">
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.FreightFee, false)}" id="FreightFee" class="form-control mr5" style="width:100px;text-align:right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.DeliveryFee, false)}" id="DeliveryFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.PackagingFee, false)}" id="PackagingFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.ForkliftFee, false)}" id="ForkliftFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.PickupFee, false)}" id="PickupFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.Insurance, false)}" id="Insurance" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+            </div>`
+
+            @*var sheet = `
+                @if (Model.TransportStatus == XY.Enums.boss.transport_status.wait_filled && Model.Status == "未清")
+                {
+                    <div class="tr-c">
+                        <div class="td-c flex1 text-right pr5">
+                            <input type="text" value="${numberFilter(@Model.FreightFee, false)}" id="FreightFee" class="form-control mr5" style="width:100px;text-align:right" />
+                        </div>
+                        <div class="td-c flex1 text-right pr5">
+                            <input type="text" value="${numberFilter(@Model.DeliveryFee, false)}" id="DeliveryFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                        </div>
+                        <div class="td-c flex1 text-right pr5">
+                            <input type="text" value="${numberFilter(@Model.PackagingFee, false)}" id="PackagingFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                        </div>
+                        <div class="td-c flex1 text-right pr5">
+                            <input type="text" value="${numberFilter(@Model.ForkliftFee, false)}" id="ForkliftFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                        </div>
+                        <div class="td-c flex1 text-right pr5">
+                            <input type="text" value="${numberFilter(@Model.PickupFee, false)}" id="PickupFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                        </div>
+                        <div class="td-c flex1 text-right pr5">
+                            <input type="text" value="${numberFilter(@Model.Insurance, false)}" id="Insurance" class="form-control mr5" style="width: 100px; text-align: right" />
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="tr-c">
+                        <div class="td-c flex1 text-right pr5">
+                            ${numberFilter(@Model.FreightFee, false)}
+                            <input type="text" value="${numberFilter(@Model.FreightFee, false)}" id="FreightFee" class="form-control mr5" style="width:100px;text-align:right;display:none;" />
+                        </div>
+                        <div class="td-c flex1 text-right pr5">
+                            ${numberFilter(@Model.DeliveryFee, false)}
+                           <input type="text" value="${numberFilter(@Model.DeliveryFee, false)}" id="DeliveryFee" class="form-control mr5" style="width: 100px; text-align: right;display:none;" />
+                        </div>
+                        <div class="td-c flex1 text-right pr5">
+                            ${numberFilter(@Model.PackagingFee, false)}
+                           <input type="text" value="${numberFilter(@Model.PackagingFee, false)}" id="PackagingFee" class="form-control mr5" style="width: 100px; text-align: right;display:none;" />
+                        </div>
+                        <div class="td-c flex1 text-right pr5">
+                            ${numberFilter(@Model.ForkliftFee, false)}
+                            <input type="text" value="${numberFilter(@Model.ForkliftFee, false)}" id="ForkliftFee" class="form-control mr5" style="width: 100px; text-align: right;display:none;" />
+                        </div>
+                        <div class="td-c flex1 text-right pr5">
+                            ${numberFilter(@Model.PickupFee, false)}
+                            <input type="text" value="${numberFilter(@Model.PickupFee, false)}" id="PickupFee" class="form-control mr5" style="width: 100px; text-align: right;display:none;" />
+                        </div>
+                        <div class="td-c flex1 text-right pr5">
+                            ${numberFilter(@Model.Insurance, false)}
+                            <input type="text" value="${numberFilter(@Model.Insurance, false)}" id="Insurance" class="form-control mr5" style="width: 100px; text-align: right;display:none;" />
+                        </div>
+                    </div>
+
+                }`*@
+
+            // 物流单详情费用
+            $('#sheet-label').after(sheet)
+
+
+            // 其他费用，卸货费等
+            var sheet1 = `
+                <div class="tr-c">
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.DischarGecargoFee, false)}" id="DischarGecargoFee" class="form-control mr5" style="width:100px;text-align:right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.WaitFee, false)}" id="WaitFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.WarehousingFee, false)}" id="WarehousingFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.CabinetInstallationFee, false)}" id="CabinetInstallationFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.ReturnWithGoodsFee, false)}" id="ReturnWithGoodsFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.UpstairsFee, false)}" id="UpstairsFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+                <div class="td-c flex1 text-right pr5">
+                    <input type="text" value="${numberFilter(@Model.OvernightChargeFee, false)}" id="OvernightChargeFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                </div>
+            </div>`
+            $('#sheet-label1').after(sheet1)
+
+            // 合计
+            $('#total-count').html(`￥：${numberFilter( @(Model.DocTotal), false)}`)
+
+            //判断是否是数字
+            function isnum(nubmer) {
+                var re = /^(\d|([1-9]\d+))(\.\d+)?$/;
+                if (!re.test(nubmer)) {
+                    return false;
+                }
+                return true;
+            }
+
+        });
+    });
+
+</script>
+
+<div class="container-fluid">
+    <div class="box-item pb-0">
+        <div class="header-line">
+            @*<i id="Cancel" class="fr fa fa-times" style="color: #999;font-size: 14px;"></i>*@
+            <i class="fa fa-angle-up info-arrow rotate180 ml3 arr-info"></i>
+            <span class="title"><i class="bigger index">1.</i> 企业信息</span>
+            <span class="header-item ml3r">
+                <span class="color_bf">发货主体</span>
+                <img class="detail-icon" src="/images/arrow-right-y.png" />
+                <span class="data">@(Model.OidcCode)</span>
+            </span>
+            <span class="header-item ml3r">
+                <span class="color_bf">业务伙伴</span>
+                <img class="detail-icon" src="/images/arrow-right-y.png" />
+                <span class="data">@(Model.CardNname)</span>
+            </span>
+            <span class="header-item ml3r">
+                <span class="color_bf">收件公司</span>
+                <img class="detail-icon" src="/images/arrow-right-y.png" />
+                <span class="data">@(Model.ConsigneeCompany)</span>
+            </span>
+        </div>
+        <div id="entInfo" class="card-body trans-receipt">
+            <div class="line"></div>
+            <div class="line line-two"></div>
+            <div class="row justify-content-center mt025r mb05r">
+                <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4 info-title">寄件公司信息</div>
+                <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4 info-title">业务伙伴信息</div>
+                <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4 info-title">收件公司信息</div>
+            </div>
+            <div class="row justify-content-center mt035r mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">发货主体</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.OidcCode)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">物流公司</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.CardNname)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">收件公司</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.ConsigneeCompany)</div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">发货地址</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3">
+                    <div class="oneLine w84p" title="@(Model.ConsignorAddress)">@(Model.ConsignorAddress)</div>
+                </div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf pr-0">物流公司业务代码</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.CardCode)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">收件地址</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine" title="@(Model.ConsigneeAddress)">@(Model.ConsigneeAddress)</div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">采购单号</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.TransportDocOrder.Replace("PO-",""))</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">物流公司地址</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3">
+                    <div class="oneLine w84p" title="@(Model.Address)">@(Model.Address)</div>
+                </div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">收件人</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.Consignee)</div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">订单状态</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.Status)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">联系人</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.CntctCode)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">收件人联系电话</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.ConsigneeTel)</div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">过账日期</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.DocDate.ToString("yyyy.MM.dd"))</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">付款条件</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3">
+                    <div class="oneLine w84p">@(Model.PymntGroup)</div>
+                </div>@*- 现金基础 -*@
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">交货日期</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.DocDueDate.ToString("yyyy.MM.dd"))</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">付款方式</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.PaymentMethod)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">销售员</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.SlpName)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">发票类型</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.UFPLB)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">备注</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3">
+                    <div class="oneLine w84p" title="@(Model.Comments)">@(Model.Comments)</div>
+                </div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">税率</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.U_SL)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">快递单号</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.CourierNumber)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">预付款日期</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.PrepaDay)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">收款账号</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine">@(Model.UACCT)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+            </div>
+            <div class="row justify-content-center mb05r">
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf">开户行</div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine" title="@(Model.UBANK)">@(Model.UBANK)</div>
+                <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 color_bf"></div>
+                <div class="col-xl-3 col-lg-3 col-md-3 col-xs-3 col-sm-3 col-3 oneLine"></div>
+            </div>
+        </div>
+    </div>
+    <div class="box-item pb15">
+        <div class="header-line">
+            <span class="title"><i class="bigger index">2.</i> 物流单详情</span>
+            <span class="header-item">
+                <span class="color_bf ml20">采购单号</span>
+                <span class="data ml10 bigger">@(Model.TransportDocOrder.Replace("PO-",""))</span>
+            </span>
+            <span class="header-item">
+                <span class="color_bf ml20">运输方式</span>
+                <span class="data ml10">汽运快件</span>
+            </span>
+            <span class="header-item">
+                <span class="color_bf ml20">运费合计</span>
+                <span class="data ml10 bigger">@String.Format("{0:N2}", Model.DocTotal)</span>
+            </span>
+            <i class="fa fa-angle-up trans-arrow rotate180 ml3 arr-info"></i>
+        </div>
+        <div class="steps fs-22 mt10">
+            <div class="step done">
+                <div class="step-line">
+                    <span class="duration"></span>
+                    <div class="operator"></div>
+                </div>
+                <div class="item">
+                    <div class="operation">创建物流单</div>
+                    <div class="operate-time">@(Model.CreateDate.ToString("yyyy.MM.dd hh:mm:ss"))</div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-line">
+                    <span class="duration"></span>
+                    <div class="operator"></div>
+                </div>
+                <div class="item">
+                    <div class="operation">称重</div>
+                    <div class="operate-time"></div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-line">
+                    <span class="duration"></span>
+                    <div class="operator"></div>
+                </div>
+                <div class="item">
+                    <div class="operation">包装</div>
+                    <div class="operate-time"></div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-line">
+                    <span class="duration"></span>
+                    <div class="operator"></div>
+                </div>
+                <div class="item">
+                    <div class="operation">发货</div>
+                    <div class="operate-time"></div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-line">
+                    <span class="duration"></span>
+                    <div class="operator"></div>
+                </div>
+                <div class="item">
+                    <div class="operation">抵达目的地</div>
+                    <div class="operate-time"></div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-line">
+                    <span class="duration"></span>
+                    <div class="operator"></div>
+                </div>
+                <div class="item">
+                    <div class="operation">填写物流单数据</div>
+                    <div class="operate-time"></div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-line">
+                    <span class="duration"></span>
+                    <div class="operator"></div>
+                </div>
+                <div class="item">
+                    <div class="operation">回写ERP</div>
+                    <div class="operate-time"></div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-line">
+                    <span class="duration"></span>
+                    <div class="operator"></div>
+                </div>
+                <div class="item">
+                    <div class="operation">完成</div>
+                </div>
+            </div>
+            @*<div class="step">
+                <div class="item done">创建物流单</div>
+                <div class="step-line">
+                    <span class="date">@(Model.CreateDate.ToString("yyyy.MM.dd"))</span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="item pending">称重</div>
+                <div class="step-line">
+                    <span class="date"></span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="item">包装</div>
+                <div class="step-line">
+                    <span class="date"></span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="item">发货</div>
+                <div class="step-line">
+                    <span class="date"></span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="item">抵达目的地</div>
+                <div class="step-line">
+                    <span class="date"></span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="item">填写物流单数据</div>
+                <div class="step-line">
+                    <span class="date"></span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="item">回写ERP</div>
+                <div class="step-line">
+                    <span class="date"></span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="item">完成</div>
+                <div class="step-line">
+                    <span class="date"></span>
+                </div>
+            </div>*@
+        </div>
+        <div id="transDetail-ele" class="card-body mt10 p-0">
+            <div class="table-box pl-0 pr-0">
+                <div class="top-c clearfix">
+                    <div class="left">采购单号: @(Model.TransportDocOrder.Replace("PO-",""))</div>
+                    <div class="right">
+                        托运日期
+                        <span class="ml20">@(Model.DateOfConsignment)</span>
+                        @*<span class="date">@(Model.DateOfConsignment.Split(".")[1])</span>月
+                            <span class="date">@(Model.DateOfConsignment.Split(".")[2])</span>日*@
+                    </div>
+                </div>
+                <div class="table-c">
+                    <div class="tr-c">
+                        <div class="td-c label w5p">
+                            发货人
+                        </div>
+                        <div class="td-c w5p text-left pl5">
+                            @(Model.Consignor)
+                        </div>
+                        <div class="td-c label w5p">
+                            发货单位
+                        </div>
+                        <div class="td-c w23p text-left pl5">
+                            @(Model.ConsignorCompany)
+                        </div>
+                        <div class="td-c label w5p">
+                            发货地址
+                        </div>
+                        <div class="td-c flex1 text-left pl5">
+                            @(Model.ConsignorAddress)
+                        </div>
+                        <div class="td-c label w5p">
+                            联系电话
+                        </div>
+                        <div class="td-c w14p text-left pl5">
+                            @(Model.ConsignorTel)
+                        </div>
+                    </div>
+                    <div class="tr-c">
+                        <div class="td-c label w5p">
+                            收件人
+                        </div>
+                        <div class="td-c w5p text-left pl5">
+                            @(Model.Consignee)
+                        </div>
+                        <div class="td-c label w5p">
+                            收件单位
+                        </div>
+                        <div class="td-c w23p text-left pl5 oneLine" title="东莞市道滘镇上梁洲四横路6号鹏威能源">
+                            @(Model.ConsigneeCompany)
+                        </div>
+                        <div class="td-c label w5p">
+                            收件地址
+                        </div>
+                        <div class="td-c flex1 text-left pl5">
+                            @(Model.ConsigneeAddress)
+                        </div>
+                        <div class="td-c label w5p">
+                            联系电话
+                        </div>
+                        <div class="td-c w14p text-left pl5">
+                            @(Model.ConsigneeTel)
+                        </div>
+                    </div>
+                    <div class="tr-c">
+                        <div class="td-c flex1" style="border:none;padding: 0;">
+                            <div class="tr-c">
+                                <div class="td-c label w25p">
+                                    货物名称
+                                </div>
+                                <div class="td-c label w10p">
+                                    编号
+                                </div>
+                                <div class="td-c label w10p">
+                                    包装
+                                </div>
+                                <div class="td-c label w10p">
+                                    件数
+                                </div>
+                                <div class="td-c label w10p">
+                                    体积（m³）
+                                </div>
+                                <div class="td-c label w10p">
+                                    重量（公斤）
+                                </div>
+                                <div class="td-c label w25p">
+                                    装箱单号
+                                </div>
+                            </div>
+
+                            @foreach (var item in Model.transportDocDetailList)
+                                {
+                                    <div class="tr-c itemInfo">
+                                        <div class="td-c w25p text-left pl5">
+                                            @item.goods
+                                            <input type="text" value="@item.goods" id="" class="form-control mr5 goods" style="width: 100px; text-align: right;display:none" />
+                                        </div>
+                                        <div class="td-c w10p text-left pl5">
+                                            <input type="text" value="@item.item_number" id="" class="form-control mr5 itemNumber" style="width: 100px; text-align: right" />
+                                            @*@item.item_number*@
+                                        </div>
+                                        <div class="td-c w10p text-left pl5">
+                                            @*@item.packingType*@
+                                            <input type="text" value="@item.packingType" id="" name="packingType" class="form-control mr5 packingType" style="width: 100px; text-align: right" />
+                                            @*<select style="width:100px;height:25px" id="" class="packingType">
+                                                <option value="0">木箱1</option>
+                                                <option value="1">木箱2</option>
+                                                <option value="2">木箱3</option>
+                                                <option value="3">木箱4</option>
+                                            </select>*@
+                                        </div>
+                                        <div class="td-c w10p text-right pr5">
+                                            @if(item.pieces==""||item.itemID==0)
+                                            {
+                                                <input type="text" value="@item.pieces" id="" name="pieces" class="form-control mr5 pieces" style="width: 100px; text-align: right" />
+                                            }else{
+                                                @item.pieces
+                                                <input type="text" value="@item.pieces" id="" name="pieces" class="form-control mr5 pieces" style="width: 100px; text-align: right;display:none" />
+                                            }
+                                        </div>
+                                        <div class="td-c w10p text-right pr5">
+                                            @*@item.volume*@
+                                            <input type="text" value="@item.volume" id="" name="volume" class="form-control mr5 volume" style="width: 100px; text-align: right" />
+                                        </div>
+                                        <div class="td-c w10p text-right pr5">
+                                            @*@item.weight*@
+                                            <input type="text" value="@item.weight" id="" name="weight" class="form-control mr5 weight" style="width: 100px; text-align: right" />
+                                        </div>
+                                        <div class="td-c w25p text-left pl5">
+                                            @item.packingNumber
+                                        </div>
+                                    </div>
+                                }
+
+                        </div>
+                        @*<div class="td-c label w5p flex">
+                                运输方式
+                            </div>
+                            <div class="td-c w14p trans-type flex">
+                                <label class="trans-check">
+                                    <input type="checkbox" class="trans-input" value="">航空
+                                </label>
+                                <label class="trans-check">
+                                    <input type="checkbox" class="trans-input" value="">汽运整车
+                                </label>
+                                <label class="trans-check">
+                                    <input type="checkbox" class="trans-input" checked value="">汽运快件
+                                </label>
+                                <label class="trans-check">
+                                    <input type="checkbox" class="trans-input" value="">汽车普件
+                                </label>
+                            </div>*@
+                    </div>
+                    <div class="tr-c">
+                        <div class="td-c label w7p">
+                            运输方式
+                        </div>
+                        <div class="td-c flex1" style="border-right: 0;">
+                            <label class="trans-check">
+                                <input type="radio" name="trans-type" class="trans-input" value="航空">航空
+                            </label>
+                        </div>
+                        <div class="td-c flex1" style="border-right: 0;">
+                            <label class="trans-check">
+                                <input type="radio" name="trans-type" class="trans-input" value="汽运整车">汽运整车
+                            </label>
+                        </div>
+                        <div class="td-c flex1" style="border-right: 0;">
+                            <label class="trans-check">
+                                <input type="radio" name="trans-type" class="trans-input" checked value="汽运快件">汽运快件
+                            </label>
+                        </div>
+                        <div class="td-c flex1">
+                            <label class="trans-check">
+                                <input type="radio" name="trans-type" class="trans-input" value="汽车普件">汽车普件
+                            </label>
+                        </div>
+                        @*<div class="td-c flex1">
+                            车辆类型
+                            <input type="text" name="trans-type" value="" class="vehicleType" style="width: 100px;" >
+                        </div>
+                        <div class="td-c flex1">
+                            车辆数
+                            <input type="text" name="trans-type" value="" class="vehicleNum" style="width: 100px;">
+                        </div>
+                        <div class="td-c flex1">
+                            是否往返
+                            <input type="text" name="trans-type" value="" class="roundTrip" style="width: 100px;">
+                        </div>*@
+                    </div>
+                    <div id="sheet-label" class="tr-c">
+                        <div class="td-c label flex1">
+                            运费
+                        </div>
+                        <div class="td-c label flex1">
+                            送货费
+                        </div>
+                        <div class="td-c label flex1">
+                            包装费
+                        </div>
+                        <div class="td-c label flex1">
+                            叉车费
+                        </div>
+                        <div class="td-c label flex1">
+                            提货费
+                        </div>
+                        <div class="td-c label flex1">
+                            保险费
+                        </div>
+                    </div>
+                    <div id="sheet-label1" class="tr-c">
+                        <div class="td-c label flex1">
+                            卸货费
+                        </div>
+                        <div class="td-c label flex1">
+                            等候费
+                        </div>
+                        <div class="td-c label flex1">
+                            入仓费
+                        </div>
+                        <div class="td-c label flex1">
+                            装柜费
+                        </div>
+                        <div class="td-c label flex1">
+                            返程带货
+                        </div>
+                        <div class="td-c label flex1">
+                            上楼费
+                        </div>
+                        <div class="td-c label flex1">
+                            压夜费
+                        </div>
+                    </div>
+
+                    @*@if (Model.TransportStatus == XY.Enums.boss.transport_status.wait_filled && Model.Status == "未清")
+                        {
+                            <div class="tr-c">
+                                <div class="td-c flex1 text-right pr5">
+                                    <input type="text" value="numberFilter(@Model.FreightFee, false)" id="FreightFee" class="form-control mr5" style="width:100px;text-align:right" />
+                                </div>
+                                <div class="td-c flex1 text-right pr5">
+                                    <input type="text" value="@Model.DeliveryFee" id="DeliveryFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                                </div>
+                                <div class="td-c flex1 text-right pr5">
+                                    <input type="text" value="@Model.PackagingFee" id="PackagingFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                                </div>
+                                <div class="td-c flex1 text-right pr5">
+                                    <input type="text" value="@Model.ForkliftFee" id="ForkliftFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                                </div>
+                                <div class="td-c flex1 text-right pr5">
+                                    <input type="text" value="@Model.PickupFee" id="PickupFee" class="form-control mr5" style="width: 100px; text-align: right" />
+                                </div>
+                                <div class="td-c flex1 text-right pr5">
+                                    <input type="text" value="@Model.Insurance" id="Insurance" class="form-control mr5" style="width: 100px; text-align: right" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="tr-c">
+                                <div class="td-c flex1 text-right pr5">
+                                    @Model.FreightFee
+                                </div>
+                                <div class="td-c flex1 text-right pr5">
+                                    @(Model.DeliveryFee)
+                                </div>
+                                <div class="td-c flex1 text-right pr5">
+                                    @(Model.PackagingFee)
+                                </div>
+                                <div class="td-c flex1 text-right pr5">
+                                    @(Model.ForkliftFee)
+                                </div>
+                                <div class="td-c flex1 text-right pr5">
+                                    @(Model.PickupFee)
+                                </div>
+                                <div class="td-c flex1 text-right pr5">
+                                    @(Model.Insurance)
+                                </div>
+                            </div>
+
+                        }*@
+
+
+                    <div class="tr-c">
+                        <div class="td-c label w7p">
+                            合计（大写）
+                        </div>
+                        <div class="td-c  flex1 count">
+                            <div class="count-item">
+                                <span class="num">@(Model.DocTotal_w)</span>
+                                <span class="unit">万</span>
+                            </div>
+                            <div class="count-item">
+                                <span class="num">@(Model.DocTotal_q)</span>
+                                <span class="unit">仟</span>
+                            </div>
+                            <div class="count-item">
+                                <span class="num">@(Model.DocTotal_b)</span>
+                                <span class="unit">佰</span>
+                            </div>
+                            <div class="count-item">
+                                <span class="num">@(Model.DocTotal_s)</span>
+                                <span class="unit">拾</span>
+                            </div>
+                            <div class="count-item">
+                                <span class="num">@(Model.DocTotal_y)</span>
+                                <span class="unit">元</span>
+                            </div>
+                            <div class="count-item">
+                                <span class="num">@(Model.DocTotal_j)</span>
+                                <span class="unit">角</span>
+                            </div>
+                            <div class="count-item">
+                                <span class="num">@(Model.DocTotal_f)</span>
+                                <span class="unit">分</span>
+                            </div>
+                        </div>
+                        <div class="td-c label w7p">
+                            合计
+                        </div>
+                        <div id="total-count" class="td-c w10p text-right pr5">
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fl w100p btns">
+        @if (Model.write_back_status != XY.Enums.boss.write_back_status.success_writeback)
+        {
+            <button id="Submit" type="button" class="btn btn-sm btn-warning fr pl1r pr1r mr8r">
+                @*<i class="fas fa-check" aria-hidden="true"></i>*@
+                <span>保存</span>
+            </button>
+        }
+
+        <button id="Cancel" type="button" class="btn btn-sm btn-outline-secondary fr pl1r pr1r mr05r">
+            @*<i class="fas fa-check" aria-hidden="true"></i>*@
+            <span>返回</span>
+        </button>
+    </div>
+</div>

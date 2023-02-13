@@ -1,0 +1,527 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Supplier.Web\\XY.Supplier.Web.csproj": {}
+  },
+  "projects": {
+    "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Boss\\XY.Boss.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Boss\\XY.Boss.csproj",
+        "projectName": "XY.Boss",
+        "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Boss\\XY.Boss.csproj",
+        "packagesPath": "C:\\Users\\neware.com.cn\\.nuget\\packages\\",
+        "outputPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Boss\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\neware.com.cn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Business\\XY.Business.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Business\\XY.Business.csproj"
+              },
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj"
+              },
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.FileExtensions": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "QRCoder": {
+              "target": "Package",
+              "version": "[1.4.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Business\\XY.Business.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Business\\XY.Business.csproj",
+        "projectName": "XY.Business",
+        "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Business\\XY.Business.csproj",
+        "packagesPath": "C:\\Users\\neware.com.cn\\.nuget\\packages\\",
+        "outputPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Business\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\neware.com.cn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj"
+              },
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Model\\XY.Model.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Model\\XY.Model.csproj"
+              },
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Dapper": {
+              "target": "Package",
+              "version": "[2.0.78, )"
+            },
+            "ICSharpCode.SharpZipLib.dll": {
+              "target": "Package",
+              "version": "[0.85.4.369, )"
+            },
+            "Microsoft.AspNetCore.Http.Features": {
+              "target": "Package",
+              "version": "[5.0.4, )"
+            },
+            "Microsoft.Extensions.Logging.Log4Net.AspNetCore": {
+              "target": "Package",
+              "version": "[6.1.0, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.5.6, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
+            },
+            "QRCoder": {
+              "target": "Package",
+              "version": "[1.4.1, )"
+            },
+            "log4net": {
+              "target": "Package",
+              "version": "[2.0.14, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj",
+        "projectName": "XY.Entity",
+        "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj",
+        "packagesPath": "C:\\Users\\neware.com.cn\\.nuget\\packages\\",
+        "outputPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\neware.com.cn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.FileExtensions": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[8.0.30, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Model\\XY.Model.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Model\\XY.Model.csproj",
+        "projectName": "XY.Model",
+        "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Model\\XY.Model.csproj",
+        "packagesPath": "C:\\Users\\neware.com.cn\\.nuget\\packages\\",
+        "outputPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Model\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\neware.com.cn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj"
+              },
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Supplier.Web\\XY.Supplier.Web.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Supplier.Web\\XY.Supplier.Web.csproj",
+        "projectName": "XY.Supplier.Web",
+        "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Supplier.Web\\XY.Supplier.Web.csproj",
+        "packagesPath": "C:\\Users\\neware.com.cn\\.nuget\\packages\\",
+        "outputPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Supplier.Web\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\neware.com.cn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Boss\\XY.Boss.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Boss\\XY.Boss.csproj"
+              },
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Business\\XY.Business.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Business\\XY.Business.csproj"
+              },
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY.Entity\\XY.Entity.csproj"
+              },
+              "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj": {
+                "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[5.0.2, )"
+            },
+            "System.Drawing.Common": {
+              "target": "Package",
+              "version": "[5.0.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj",
+        "projectName": "XY",
+        "projectPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\XY.csproj",
+        "packagesPath": "C:\\Users\\neware.com.cn\\.nuget\\packages\\",
+        "outputPath": "D:\\GIT.NEWARE.WORK\\neware-mes\\Sources\\XY\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\neware.com.cn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Dapper": {
+              "target": "Package",
+              "version": "[2.0.78, )"
+            },
+            "Microsoft.AspNetCore.Http.Abstractions": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.Bcl.AsyncInterfaces": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Data.Sqlite": {
+              "target": "Package",
+              "version": "[5.0.2, )"
+            },
+            "Microsoft.Extensions.Caching.Memory": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Caching.StackExchangeRedis": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.FileExtensions": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[8.0.30, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.5.6, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
+            },
+            "System.Drawing.Common": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "System.Management": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "System.Runtime.Caching": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.408\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

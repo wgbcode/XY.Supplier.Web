@@ -1,0 +1,260 @@
+﻿@using XY.Supplier.Web
+@model XY.Supplier.Web.Models.Purchase.PurchaseOrder_Shot_Model
+
+<link rel="stylesheet" href="/scripts/swiper/css/swiper.css">
+<style type="text/css">
+
+    .title {
+        width: 100%;
+        height: 10vh;
+        line-height: 10vh;
+        background-color: #f59a23;
+        font-family: 'Arial Negreta', 'Arial Normal', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        font-size: 52px;
+        color: #FFFFFF;
+        text-align: center;
+    }
+
+    .h1 {
+        width: 100%;
+        height: 7vh;
+        background-color: #ffffff;
+        font-family: 'Arial Negreta', 'Arial Normal', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        font-size: 36px;
+        color: #000000;
+        text-align: left;
+    }
+
+    .swiper-container {
+        overflow: hidden;
+    }
+
+    .table-th {
+        width: 100%;
+        height: 7.5vh;
+        line-height: 7.5vh;
+        background-color: #f2f2f2;
+        font-family: 'Arial Negreta', 'Arial Normal', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        font-size: 36px;
+        color: #000000;
+        text-align: left;
+        display: flex;
+    }
+
+    .column1 {
+        flex: 1;
+        padding: 0 10px;
+        border-right: 1px solid #f5f5f5;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .column2 {
+        flex: 2;
+        padding: 0 10px;
+        border-right: 1px solid #f5f5f5;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .table-tr {
+        width: 100%;
+        height: 6.5vh;
+        line-height: 6.5vh;
+        text-align: left;
+        font-family: 'Arial Negreta', 'Arial Normal', 'Arial';
+        font-style: normal;
+        font-size: 28px;
+        color: #000000;
+        text-align: left;
+        display: flex;
+        background-color: #ffffff;
+    }
+
+    .green {
+        color: #70B603;
+    }
+
+    .red {
+        color: red;
+    }
+
+    .gray {
+        color: #DDDDDD;
+    }
+
+    .group {
+        position: absolute;
+        right: 4vw;
+        top: 2.5vh;
+        cursor: pointer;
+        z-index: 1000;
+    }
+</style>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <meta http-equiv="refresh" content="180" />
+</head>
+<body style="overflow: Scroll; overflow: hidden; margin: 0.7vw 0.7vw 0.7vw 0.7vw; ">
+    <div id="content" style="width:100%;height:100vh;" class="container-fluid" onclick="Back()">
+        <div class="title">
+            <span id="title_span">@Model.BeginDay——@Model.EndDay 交货情况</span>
+            <div id="button_group" class="group" onclick="Play(event)">
+                <img id="stop" src="/images/stop.png" alt="Alternate Text" style="display: block; width: 4vw; height: 4vw;" />
+                <img id="start" src="/images/start.png" alt="Alternate Text" style="display: none; width: 4vw; height: 4vw;" />
+            </div>
+        </div>
+
+        <div class="swiper-container" style="width:100%;">
+            <div class="swiper-wrapper">
+                @if (Model.DeliveryList != null && Model.DeliveryList.Count() > 0)
+                {
+                    int PageCount = (int)Math.Ceiling((double)Model.DeliveryList.Count() / Model.PageSize);
+                    for (int page = 1; page <= PageCount; page++)
+                    {
+                        int begin = 0;
+
+
+                <div class="swiper-slide">
+                    <div class="table-th">
+                        <div class="column1">序号</div>
+                        <div class="column2">订单号</div>
+                        <div class="column2">下单时间</div>
+                        <div class="column2">要求交货时间</div>
+                        <div class="column1">延期</div>
+                        <div class="column1">状态</div>
+                    </div>
+                    @try
+                            {
+                    @foreach (var dr in Model.DeliveryList)
+                                {
+                                    begin = begin + 1;
+                                    if (begin <= (page - 1) * Model.PageSize) continue;
+                                    if ((int)dr["status"] == 9)
+                                    {
+                    <div class="table-tr green">
+                        <div class="column1">@begin</div>
+                        <div class="column2">@(dr["purchase_order"].ToString())</div>
+                        <div class="column2">@(dr["issue_time"]==DBNull.Value?((DateTime)dr["create_time"]).ToString("yyyy.MM.dd hh:mm:ss"):((DateTime)dr["issue_time"]).ToString("yyyy.MM.dd hh:mm:ss"))</div>
+                        <div class="column2">@(dr["delivery_time"]==DBNull.Value?"":((DateTime)dr["delivery_time"]).ToString("yyyy.MM.dd hh:mm:ss"))</div>
+                        <div class="column1">@(dr["is_delay"].ToString() == "0" ? "否":"是")</div>
+                        <div class="column1">已完成</div>
+                    </div>
+                                    }
+                                    else if ((int)dr["status"] == 1 || (int)dr["status"] == 2 || (int)dr["status"] == 3 || (int)dr["status"] == 4)
+                                    {
+                                        if (@dr["delivery_time"] != DBNull.Value && ((DateTime)dr["create_time"]) < DateTime.Now)
+                                        {
+                    <div class="table-tr red">
+                        <div class="column1">@begin</div>
+                        <div class="column2">@(dr["purchase_order"].ToString())</div>
+                        <div class="column2">@(dr["issue_time"]==DBNull.Value? ((DateTime)dr["create_time"]).ToString("yyyy.MM.dd hh:mm:ss") : ((DateTime)dr["issue_time"]).ToString("yyyy.MM.dd hh:mm:ss"))</div>
+                        <div class="column2">@(dr["delivery_time"]==DBNull.Value?"":((DateTime)dr["delivery_time"]).ToString("yyyy.MM.dd hh:mm:ss"))</div>
+                        <div class="column1">是</div>
+                        <div class="column1">待收料</div>
+                    </div>
+                                        }
+                                        else
+                                        {
+                    <div class="table-tr">
+                        <div class="column1">@begin</div>
+                        <div class="column2">@(dr["purchase_order"].ToString())</div>
+                        <div class="column2">@(dr["issue_time"]==DBNull.Value? ((DateTime)dr["create_time"]).ToString("yyyy.MM.dd hh:mm:ss") : ((DateTime)dr["issue_time"]).ToString("yyyy.MM.dd hh:mm:ss"))</div>
+                        <div class="column2">@(dr["delivery_time"]==DBNull.Value?"":((DateTime)dr["delivery_time"]).ToString("yyyy.MM.dd hh:mm:ss"))</div>
+                        <div class="column1">@(dr["is_delay"].ToString() == "0" ? "否":"是")</div>
+                        <div class="column1">待收料</div>
+                    </div>
+                                        }
+
+                                    }
+                                    else
+                                    {
+                    <div class="table-tr gray">
+                        <div class="column1">@begin</div>
+                        <div class="column2">@(dr["purchase_order"].ToString())</div>
+                        <div class="column2">@(dr["issue_time"]==DBNull.Value? ((DateTime)dr["create_time"]).ToString("yyyy.MM.dd hh:mm:ss") : ((DateTime)dr["issue_time"]).ToString("yyyy.MM.dd hh:mm:ss"))</div>
+                        <div class="column2">@(dr["delivery_time"]==DBNull.Value?"":((DateTime)dr["delivery_time"]).ToString("yyyy.MM.dd hh:mm:ss"))</div>
+                        <div class="column1">@(dr["is_delay"].ToString() == "0" ? "否":"是")</div>
+                        <div class="column1">已作废</div>
+                    </div>
+                                    }
+                                    if (begin >= page * Model.PageSize) break;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                    <div>@ex.Message</div>
+                            }
+
+                </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="/scripts/swiper/js/swiper.js"></script>
+<script src="/scripts/jquery.min.js"></script>
+
+<script type="text/javascript">
+    var isFullScreen = false;
+    var IsAuto = true;
+    var mySwiper = new Swiper('.swiper-container', {
+        direction: 'horizontal', // 垂直切换选项
+        loop: true, // 循环模式选项
+        autoplay: {
+            delay: 12000,
+            disableOnInteraction: false,
+        },
+        disableOnInteraction: false,
+        speed: 1000,
+    })
+    //全屏事件
+    function Back() {
+        isFullScreen = !isFullScreen;
+        if (isFullScreen) {
+            var el = document.documentElement;
+            var rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullScreen;
+
+            if (typeof rfs != "undefined" && rfs) {
+                rfs.call(el);
+            }
+            else if (typeof window.ActiveXObject != "undefined") {
+                // for Internet Explorer
+                var wscript = new ActiveXObject("WScript.Shell");
+                if (wscript != null) {
+                    wscript.SendKeys("{F11}");
+                }
+            }
+        }
+        else {
+            window.location.href = "/purchase/order?orderStatus="  + @Model.OrderStatus
+                + "&isDelayStatus=" +@Model.IsDelayStatus + "&begin=" + "@Model.Begin" + "&end=" + "@Model.End";
+            }
+    }
+    //暂停开始事件
+    function Play(event) {
+        IsAuto = !IsAuto;
+        if (IsAuto) {
+            document.getElementById("start").style.display = "none";
+            document.getElementById("stop").style.display = "block";
+            mySwiper.autoplay.start();
+        }
+        else {
+            document.getElementById("stop").style.display = "none";
+            document.getElementById("start").style.display = "block";
+            mySwiper.autoplay.stop()
+        }
+        event.stopPropagation();
+    }
+</script>
+

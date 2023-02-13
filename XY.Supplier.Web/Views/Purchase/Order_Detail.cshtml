@@ -1,0 +1,915 @@
+﻿@using System.Data
+@model XY.Supplier.Web.Models.Purchase.PurchaseOrder_View_Model
+
+@{
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+
+<style>
+    .table_fixed {
+        table-layout: fixed;
+        word-break: break-all
+    }
+
+    #dialogProduceItemPrint .fixed-height {
+        height: 250px !important;
+    }
+
+    #dialogProduceItemPrint .fixed-table-border {
+        display: none;
+    }
+
+    .card {
+        min-width: 1300px;
+    }
+
+    #dialogBindSerialNumber {
+        margin-left: 50%;
+        transform: translateX(-50%);
+        width: 32rem;
+    }
+    td[contenteditable]:empty:not(:focus):before {
+        content: '双击输入序列号';
+        color: #e9e9e9;
+        font-size: .75rem;
+    }
+    td[contenteditable]:focus {
+        outline: none;
+        background-color: #fff;
+    }
+
+    td:empty:before {
+        content: '双击输入序列号';
+        color: #e9e9e9;
+        font-size: .75rem;
+    }
+</style>
+
+<script type="text/javascript">
+    //<![CDATA[
+
+    //function submitFile() {
+    //    console.log(123)
+    //    require(['xy', 'boss', 'jquery'], function (xy, boss, $) {
+    //        var _form = $('form:first');
+    //        _form.xyvInit();
+    //        console.log(1234)
+    //        boss.submit(_form);
+    //    });
+
+    //}
+
+
+    require(['jquery', 'xy', 'xyvalid', 'boss', 'bootstrap', 'layer', 'bootstrapTable', 'bootstrapTableLocale','bootstrapTableEditor'],
+        function ($, xy, v, boss, bootstrap, layer, bootstrapTable, bt,bootstrapTableEditor) {
+        $(function () {
+            boss.tableInit($('#tableOrderItem'));
+
+            //var _form = $("#formFile");
+            //_form.xyvInit();
+
+            //点击返回
+            $('#Cancel').on('click', function () {
+                boss.load('@Html.Raw(Model.Backurl)');
+            });
+
+            var purchaseID =@Model.PurchaseID;
+            var itemID = 0;
+
+            function saveData(index, field, tdValue) {
+                //更新单元格
+                $('#tablePrintInfo').bootstrapTable('updateCell', {
+                    index: index,
+                    field: field,
+                    value: tdValue
+                })
+            }
+
+            //保存序列号
+            function saveDataSerialNumber(index, field, tdValue) {
+                //更新单元格
+                $('#tbSerialNumber').bootstrapTable('updateCell', {
+                    index: index,
+                    field: field,
+                    value: tdValue
+                })
+            }
+
+            // 判断字符串是否包含中文
+            function hasChinese(str) {
+                return /[\u4E00-\u9FA5]+/g.test(str)
+            }
+
+            //加载打印信息
+            $('#dialogProduceItemPrint').on('show.bs.modal', function () {
+                $('#tablePrintInfo').bootstrapTable('destroy');
+                $('#tablePrintInfo').bootstrapTable({
+                    url: "/Purchase/Order_GetProduceOrderInfo",
+                    method: "get",
+                    contentType: 'application/json',
+                    pagination: true,                   //是否显示分页（*）
+                    //pageNumber: pageNumber || 1,//初始化加载第一页，默认第一页
+                    pageSize: 10,//每页的记录行数（*）
+                    pageList: [10, 30, 50, 100, 500],//可供选择的每页的行数（*）
+                    striped: true,//是否显示行间隔色
+                    sidePagination: "server",
+                    paginationPreText: "<",
+                    paginationNextText: ">",
+                    paginationLoop: false,
+                    height: 250,
+                    idField: 'ProduceID',
+                    //uniqueId: "itemId",
+                    queryParams: function (params) {
+                        return {
+                            purchaseID: purchaseID,
+                            limit: params.limit,
+                            offset: params.offset
+                        };
+                    },
+                    columns: [
+                        {
+                            checkbox: true,
+                            width: 50
+                        },
+                        {
+                            field: 'ProduceID',
+                            visible: false,
+                        },
+                        {
+                            field: '',
+                            title: '#',
+                            formatter: function (value, row, index) {
+                                var pageSize = $('#tablePrintInfo').bootstrapTable('getOptions').pageSize;//通过表的#id 可以得到每页多少条
+                                var pageNumber = $('#tablePrintInfo').bootstrapTable('getOptions').pageNumber;//通过表的#id 可以得到当前第几页
+                                return pageSize * (pageNumber - 1) + index + 1;//返回每条的序号： 每页条数 * （当前页 - 1 ）+ 序号
+                            },
+                            width: 30
+                        },
+                        {
+                            field: 'ProduceOrder',
+                            title: '生产订单',
+                            //width: 100
+                        },
+                        {
+                            field: 'ItemCode',
+                            title: '物料编码',
+                            width: 170
+                        },{
+                            field: 'ItemQty',
+                            title: '标签数量',
+                            //width: 50
+                        },
+                        {
+                            field: 'Copies',
+                            title: '份数',
+                            width: 80
+                        },
+                        {
+                            field: 'Remarks',
+                            title: '备注',
+                            width: 200
+                        },
+                        {
+                            field: 'ItemRule',
+                            title: '规则',
+                            //width: 50
+                        }
+                    ],
+                    responseHandler: function (res) {
+                        var data = JSON.parse(res)
+                        var objtmp = {
+                            "rows": JSON.parse(data.data),
+                            "total": data.total//总个数
+                        }
+                        return objtmp;
+                    },
+                    onClickCell: function (field, value, row, $element) {
+                        switch (field) {
+                            case "ItemQty":
+                                $element.attr('contenteditable', true);
+                                $element.blur(function () {
+                                    let index = $element.parent().data('index');
+                                    let tdValue = $element.html();
+                                    if (parseFloat(tdValue).toString() == "NaN" || parseFloat(tdValue).toString() == "0") {
+                                        layer.msg("请输入大于0的数值！");
+                                        tdValue = value;
+                                    }
+                                    saveData(index, field, parseFloat(tdValue));
+                                })
+                                break;
+                            case "Copies":
+                                $element.attr('contenteditable', true);
+                                $element.blur(function () {
+                                    let index = $element.parent().data('index');
+                                    let tdValue = $element.html();
+                                    if (parseFloat(tdValue).toString() == "NaN" || parseFloat(tdValue).toString() == "0" || parseFloat(tdValue)>999) {
+                                        layer.msg("请输入大于0的小于999的数值！");
+                                        tdValue = value;
+                                    }
+                                    saveData(index, field, parseFloat(tdValue));
+                                })
+                                break;
+                            case "Remarks":
+                                $element.attr('contenteditable', true);
+                                $element.blur(function () {
+                                    let index = $element.parent().data('index');
+                                    let tdValue = $element.html();
+                                    if (tdValue.length > 20) {
+                                        layer.msg("备注信息不能超过20个字符！");
+                                        tdValue = value;
+                                    }
+                                    saveData(index, field, tdValue);
+                                })
+                                break;
+                            default:
+                        }
+                    },
+                    // 行点击事件
+                    onClickRow: function (row, $element) {
+                    },
+                    // 表格渲染完成事件
+                    onPostBody() {
+                    },
+                    onLoadSuccess(data) {
+                        //boss.tableInit($('#tableItem'));
+                    }
+                });
+            })
+
+            //生产打印
+            $('#DialogPrint').on('click', function () {
+                var printData = $("#tablePrintInfo").bootstrapTable('getSelections')
+                if (printData.length == 0) {
+                    layer.msg("请选择要打印的订单信息！");
+                    return
+                }
+                $.ajax({
+                    type: "post",
+                    url: "/Purchase/Order_Product_ItemPrint",
+                    data: { printData: JSON.stringify(printData)},
+                    contentType: "application/x-www-form-urlencoded",
+                    dataType: "json",
+                    beforeSend: function () {
+                        $("#DialogPrint").attr("disabled", true);
+                    },
+                    success: function (res) {
+                        if (res != null) {
+                            //调用打印
+                            printJS({
+                                printable: res,
+                                type: 'image'//image pdf
+                            });
+                        } else {
+                            layer.msg("打印失败!");
+                        }
+                        $("#DialogPrint").attr("disabled", false);
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        console.log(XMLHttpRequest);
+                        console.log(textStatus);
+                        console.log(errorThrown);
+                        layer.msg("打印失败!");
+                        $("#DialogPrint").attr("disabled", false);
+                    }
+                });
+                //$("#dialogProduceItemPrint").modal("hide");
+                //print("Order_Product_ItemPrint", receiptItem, webPrint, null);
+
+            });
+
+            var isAdd = true;
+            //显示绑定序列号弹框
+            $("#tableOrderItem").on('click', '.cserialNumber', function () {
+                itemID = $(this).attr("data-itemId")
+                isAdd = true;
+               // $('#dialogBindSerialNumber').modal({ show: true});
+                showDialogBindSerialNumber();
+            });
+
+            //显示修改序列号弹框
+            $("#tableOrderItem").on('click', '.serialNumber_Edit', function () {
+                itemID = $(this).attr("data-itemId")
+                isAdd = false;
+                //$('#dialogBindSerialNumber').modal({ show: true });
+                showDialogBindSerialNumber();
+            });
+
+
+            function showDialogBindSerialNumber() {
+
+                $('#tbSerialNumber').bootstrapTable('destroy');
+                $('#tbSerialNumber').bootstrapTable({
+                    url: "/Purchase/Order_OrderSerialNumberWaitBind",
+                    method: "get",
+                    contentType: 'application/json',
+                    pagination: false,                   //是否显示分页（*）
+                    //pageNumber: pageNumber || 1,//初始化加载第一页，默认第一页
+                    pageSize: 10,//每页的记录行数（*）
+                    pageList: [10, 30, 50, 100, 500],//可供选择的每页的行数（*）
+                    striped: true,//是否显示行间隔色
+                    sidePagination: "server",
+                    paginationPreText: "<",
+                    paginationNextText: ">",
+                    paginationLoop: false,
+                    height: 350,
+                    width: 200,
+                    idField: 'ProduceID',
+                    //uniqueId: "itemId",
+                    queryParams: function (params) {
+                        return {
+                            purchaseID: purchaseID,
+                            limit: params.limit,
+                            offset: params.offset,
+                            itemID: itemID
+                        };
+                    },
+                    columns: [
+                        {
+                            checkbox: true,
+                            width: "5px"
+                        },
+                        {
+                            field: '',
+                            title: '#',
+                            width: "3px",
+                            formatter: function (value, row, index) {
+                                return index + 1;
+                            }
+                        },
+                        {
+                            field: 'serial_number',
+                            title: '序列号'
+                        }
+                    ],
+                    responseHandler: function (res) {
+                        var data = JSON.parse(res)
+                        if (data.Code == 1) {
+                            layer.msg(data.Message);
+                        }
+                        var objtmp = {
+                            "rows": data.Data,
+                            "total": data.Data.length //总个数
+                        }
+                        return objtmp;
+                    },
+                    onClickCell: function (field, value, row, $element) {
+                        switch (field) {
+                            case "serial_number":
+                                $element.attr('contenteditable', 'plaintext-only');
+                                $element.blur(function () {
+                                    let index = $element.parent().data('index');
+                                    let tdValue = $element.html();
+                                    console.log(tdValue)
+                                    if (tdValue.length > 30) {
+                                        layer.msg("序列号长度不能超过30个字符！");
+                                        tdValue = value;
+                                    }
+                                    saveDataSerialNumber(index, field, tdValue);
+                                })
+                                break;
+                            default:
+                        }
+                    },
+                    // 行点击事件
+                    onClickRow: function (row, $element) {
+                    },
+                    // 表格渲染完成事件
+                    onPostBody() {
+                    },
+                    onLoadSuccess(data) {
+                        //boss.tableInit($('#tableItem'));
+                    }
+                });
+
+                $('#dialogBindSerialNumber').modal({ show: true });
+            }
+
+            //提交系列号绑定
+            $("#btnSubmit").on('click', function () {
+
+                var printData = $("#tbSerialNumber").bootstrapTable('getData')
+                var serialNumbarArr ="";
+                for (var i = 0; i < printData.length; i++) {
+                    var sn = printData[i].serial_number.replace(/&nbsp;/gi, '');
+                    if (sn.length==0) {
+                        //layer.msg("请填写完整所有的序列号！");
+                        //return
+                    } else {
+                        //serialNumbarArr.push(printData[i].serial_number.replace(/&nbsp;/gi, ''));
+                        //判断是否包含中文
+                        if (hasChinese(sn)) {
+                            layer.msg("序列号中包含中文,请确认！");
+                            return
+                        }
+
+                        if (serialNumbarArr!="") {
+                            serialNumbarArr += "," + sn;
+                        } else {
+                            serialNumbarArr = sn;
+                        }
+                    }
+                }
+                var postdata = {
+                    purchaseID: purchaseID,
+                    itemID: itemID,
+                    serialNumbarArr: serialNumbarArr
+                };
+                var requestUrl = "/Purchase/Order_SerialNumberBind";
+                //if (!isAdd) {
+                //    requestUrl = "/Purchase/Order_SerialNumberBindUpdate";
+                //}
+
+                $.ajax({
+                    type: "post",
+                    url: requestUrl,
+                    data: postdata,
+                    contentType: "application/x-www-form-urlencoded",
+                    dataType: "json",
+                    beforeSend: function () {
+                        $("#btnSubmit").attr("disabled", true);
+                    },
+                    success: function (res) {
+                        var data = JSON.parse(res)
+                        if (data.Code==0) {
+                            layer.msg(data.Message, { time: 2000 }, function () {
+                                //$('#dialogBindSerialNumber').modal({ show: false });
+                                $("#dialogBindSerialNumber").modal("hide");
+                            });
+                        } else {
+                            layer.msg(data.Message);
+                        }
+                        $("#btnSubmit").attr("disabled", false);
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        layer.msg("绑定序列号失败!");
+                        $("#btnSubmit").attr("disabled", false);
+                    }
+                });
+            })
+
+            //var fileList = [] // 文件list
+
+            $("#uploadFile").on('input', function (e) {
+                var fileItem = $('#uploadFile')[0].files[0]
+                var formData = new FormData();
+                formData.append('file', fileItem)
+                //formData.append('type', '1')
+                formData.append('purchaseID', purchaseID)
+                formData.append('itemID', itemID)
+
+                $.ajax({
+                    type: "post",
+                    url: "/Purchase/Order_SerialNumberImport",
+                    data: formData,
+                    async: true,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    success: function (res) {
+                        var data = JSON.parse(res)
+                        if (data.Code == 0) {
+                            layer.msg(data.Message, { time: 2000 }, function () {
+                                //$('#dialogBindSerialNumber').modal({ show: false });
+                                $("#dialogBindSerialNumber").modal("hide");
+                            });
+                        } else {
+                            layer.msg(data.Message);
+                        }
+
+                        $("#uploadFile").val("");
+                    }
+                });
+            });
+
+            //打印外包装条码
+            $("#packageNoPrint").on('click', function () {
+                var idArray = boss.tableSelectValue($('#tableOrderItem'));
+                if (idArray.length == 0) {
+                    layer.msg("请选择要打印的订单物料外包装信息！");
+                    return
+                }
+                if (idArray.length != 1) {
+                    layer.msg("一次只能选择一个物料进行外包装打印！");
+                    return
+                }
+
+                itemID = idArray[0]
+                //$('#dialogBindSerialNumber').modal({ show: true });
+                ShowPrintSerialNumber(purchaseID, idArray[0]);
+            })
+
+            //显示已绑定待打印的序列号信息
+            function ShowPrintSerialNumber(purchaseID, itemID) {
+                $('#tbSerialNumberPrint').bootstrapTable('destroy');
+                $('#tbSerialNumberPrint').bootstrapTable({
+                    url: "/Purchase/Order_OrderSerialNumberHasBind",
+                    method: "get",
+                    contentType: 'application/json',
+                    pagination: false,                   //是否显示分页（*）
+                    //pageNumber: pageNumber || 1,      //初始化加载第一页，默认第一页
+                    pageSize: 10,                      //每页的记录行数（*）
+                    pageList: [10, 30, 50, 100, 500], //可供选择的每页的行数（*）
+                    striped: true,                   //是否显示行间隔色
+                    sidePagination: "server",
+                    paginationPreText: "<",
+                    paginationNextText: ">",
+                    paginationLoop: false,
+                    height: 350,
+                    width: 70,
+                    idField: 'serial_number',
+                    //uniqueId: "itemId",
+                    queryParams: function (params) {
+                        return {
+                            purchaseID: purchaseID,
+                            limit: params.limit,
+                            offset: params.offset,
+                            itemID: itemID
+                        };
+                    },
+                    columns: [
+                        {
+                            checkbox: true,
+                            width: 5
+                        },
+                        {
+                            field: '',
+                            title: '#',
+                            formatter: function (value, row, index) {
+                                return index + 1;
+                            },
+                            width: 5
+                        },
+                        {
+                            field: 'serial_number',
+                            title: '序列号',
+                            width:30
+                        },
+                        {
+                            field: 'packageNo',
+                            title: '箱号',
+                            width:30
+                        }
+                    ],
+                    responseHandler: function (res) {
+                        var data = JSON.parse(res)
+                        if (data.Code == 1) {
+                            layer.msg(data.Message);
+                        }
+                        var objtmp = {
+                            "rows": data.Data,
+                            "total": data.Data.length //总个数
+                        }
+                        if (data.Data.length>0) {
+                            $('#dialogPackageNoPrint').modal({ show: true });
+                        } else {
+                            layer.msg("请先录入序列号！");
+                        }
+                        return objtmp;
+                    },
+                    onClickCell: function (field, value, row, $element) {
+                    },
+                    // 行点击事件
+                    onClickRow: function (row, $element) {
+                    },
+                    // 表格渲染完成事件
+                    onPostBody() {
+                    },
+                    onLoadSuccess(data) {
+                        //boss.tableInit($('#tableItem'));
+                    }
+                });
+            }
+
+            //打印外包装条码提交
+            $("#btnPackageNoPrint").on('click', function () {
+                var printData = $("#tbSerialNumberPrint").bootstrapTable('getSelections')
+                if (printData.length == 0) {
+                    layer.msg("请选择要打印外包装的序列号！");
+                    return
+                }
+                var postdata = {
+                    purchaseID: purchaseID,
+                    itemID: itemID,
+                    serialNumbarInfo: JSON.stringify(printData)
+                };
+                //加载层
+                var msg = layer.msg('数据处理中', {
+                    icon: 16,
+                    shade: 0.01,
+                    time: false
+                });
+
+                $.ajax({
+                    type: "post",
+                    url: "/Purchase/Order_SerialNumberPrint",
+                    data: postdata,
+                    dataType: "json",
+                    beforeSend: function () {
+                        $("#btnPackageNoPrint").attr("disabled", true);
+                    },
+                    success: function (res) {
+                        layer.close(msg)
+                        var data = JSON.parse(res)
+                        if (data.Code == 0) {
+                            $('#dialogPackageNoPrint').modal('hide')
+                            var ss = JSON.parse(data.Message)
+                            //图片打印
+                            printJS({
+                                printable: ss,
+                                type: 'image'//image pdf
+                            });
+                        }
+                        else {
+                            layer.msg(data.Message, { time: 3000 }, function () { });
+                        }
+                        $("#btnPackageNoPrint").attr("disabled", false);
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        layer.msg("绑定序列号失败!");
+                        $("#btnPackageNoPrint").attr("disabled", false);
+                    }
+                });
+            })
+        });
+       });
+    //]]>
+
+</script>
+
+<div class="modal fade" id="dialogProduceItemPrint" tabindex="-1" role="dialog" aria-labelledby="dialogTitle" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" id="dialogTitle">生产打印</span>
+                <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body fz0875r">
+                <table id="tablePrintInfo" class="table_fixed"></table>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary btn-sm w100" data-dismiss="modal">取消</button>
+                <button id="DialogPrint" type="button" class="btn btn-warning btn-sm w100">打印</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dialogPackageNoPrint" tabindex="-1" role="dialog" aria-labelledby="dialogTitle" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" id="dialogTitle">序列号</span>
+                <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body fz0875r">
+                <table id="tbSerialNumberPrint" class="table_fixed"></table>
+            </div>
+            <div class="modal-footer justify-content-center">
+                @*<button type="button" class="btn btn-secondary btn-sm w100" data-dismiss="modal">取消</button>*@
+                <button id="btnPackageNoPrint" type="button" class="btn btn-warning btn-sm w100">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div class="modal fade" id="dialogSerialNumberExport" tabindex="-1" role="dialog" aria-labelledby="dialogTitle" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <form action="/Purchase/Order_SerialNumberImport" method="post" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title" id="dialogTitle">序列号导入</span>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body fz0875r">
+                    <div class="col-xl-9">
+                        <div class="fl w100p mb5">
+                            <input type="file" id="File" name="File" class="form-control form-control-sm w90p" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                                   xy-required="true" xy-title="请选择文件！" />
+                        </div>
+                        <div class="fl w100p lh180p lightgray">
+                            <span>仅支持Execl文件，将序列号放在第一列中</span><br />
+                            <span>如果导入文件较大需要花费稍长时间，请耐心等待。</span><br />
+                            <a href="/resource/warehouse_cell_import.xlsx" download>序列号文件模板示例</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary btn-sm w100" data-dismiss="modal">取消</button>
+                    <button id="serialNumberExport" type="button" class="btn btn-warning btn-sm w100">确认</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>*@
+
+@using (Html.BeginForm())
+{
+    <div class="container-fluid">
+        <div class="fl w100p">
+            <button id="Cancel" type="button" class="btn btn-sm btn-warning mb10 fr">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                <span>返回</span>
+            </button>
+
+            @*<button id="ProducePrint" type="button" class="btn btn-sm btn-warning mb10 fr" style="margin-right:15px" data-toggle="modal" data-target="#dialogProduceItemPrint">
+                <i class="fa fa-print" aria-hidden="true"></i>
+                <span>生产打印</span>
+            </button>*@
+
+        <button id="packageNoPrint" type="button" class="btn btn-sm btn-warning mb10 fr" style="margin-right:15px" data-toggle="modal">
+            @*data-target="#dialogPackageNoPrint"*@
+            <i class="fa fa-print" aria-hidden="true"></i>
+            <span>外包装标签</span>
+        </button>
+
+        </div>
+        <div class="card">
+            <div class="card-header b">采购订单详情</div>
+            <div class="card-body">
+                <div class="row justify-content-center mt1r mb05r">
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">采购订单号</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4">@(Model.PurchaseOrder)</div>
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">状态</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4">
+                        @(XY.Enums.boss.Tools.purchase_status(Model.Status))
+                    </div>
+                </div>
+                <div class="row justify-content-center mb05r">
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">供应商</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4 oneLine" title="@Model.SupplierName">@Model.SupplierName</div>
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">订单创建人</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4">@Model.Creator</div>
+                </div>
+                <div class="row justify-content-center mb05r">
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">交期类型</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4">@(XY.Enums.boss.Tools.delivery_type(Model.DeliveryType))</div>
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">计划交货时间</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4">@Model.DeliveryTime?.ToString("yyyy.MM.dd")</div>
+                </div>
+                <div class="row justify-content-center mb05r">
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">单价是否含税</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4">@(Model.IsTax ? "是" : "否")</div>
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">审核流程</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4">@Model.WfName</div>
+                </div>
+                <div class="row justify-content-center mb05r">
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">收货地区</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4">@Model.ShipZoneCode</div>
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">收货地址</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4 oneLine" title="@Model.ShipAddr">@Model.ShipAddr</div>
+                </div>
+                <div class="row justify-content-center mb05r">
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">收货人姓名</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4">@Model.ShipName</div>
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">收货人电话</div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-xs-4 col-sm-4 col-4">@Model.ShipPhone</div>
+                </div>
+                <div class="row justify-content-center mb1r">
+                    <div class="col-xl-1 col-lg-1 col-md-1 col-xs-1 col-sm-1 col-1 gray">备注</div>
+                    <div class="col-xl-9 col-lg-9 col-md-9 col-xs-9 col-sm-9 col-9 oneLine" title="@Model.Remark">@Model.Remark</div>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="background-color: rgba(236,240,245); border: none;">
+            <div class="boss_table_top mt10 ml15">
+                <div class="fl mb10 subtitle" style="font-size: .85rem;">采购订单包含物料</div>
+            </div>
+            <div class="boss_table_body table-responsive">
+                <table id="tableOrderItem" class="table table-bordered table-hover" style="width: 40rem;">
+                    <thead>
+                        <tr>
+                            <th class="w10"><input id="SelectAll" type="checkbox" /></th>
+                            <th class="w3p">#</th>
+                            @*<th class="w14p">名称</th>*@
+                            <th class="w14p">物料编码</th>
+                            <th>物料描述</th>
+                            @*<th class="w5p">单价</th>*@
+                            <th class="w5p">已收料/总数</th>
+                            <th class="w10p">规则</th>
+                            <th class="w10p">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.OrderItemList != null && Model.OrderItemList.Rows.Count > 0)
+                        {
+                            var i = 0;
+                            foreach (DataRow dr in Model.OrderItemList.Rows)
+                            {
+                                i++;
+                                <tr>
+                                    <td><input type="checkbox" value="@(dr["item_id"].ToString())" /></td>
+                                    @*<td>@dr["name"]</td>*@
+                                    <td>@(i.ToString())</td>
+                                    <td>@dr["code"]</td>
+                                    <td style="max-width: 300px;" title="@dr["summ"]">@dr["summ"]</td>
+                                    @*<td class="text-right">@dr["price_unit"].ToString().TrimEnd('0').TrimEnd('.')</td>*@
+                                    <td class="text-right">@dr["receipt_qty"].ToString().TrimEnd('0').TrimEnd('.')/@dr["item_qty"].ToString().TrimEnd('0').TrimEnd('.')</td>
+                                    <td>@(XY.Enums.boss.Tools.item_rule((XY.Enums.boss.item_rule)dr["rule"]))</td>
+                                    <td class="text-left">
+                                        @*<button data-toggle="modal" data-target="#dialogStepObj" class="Total_Detail">绑定序列号</button>*@
+                                        <input type="button" value="绑定序列号" data-toggle="modal" class="cserialNumber" data-itemId='@dr["item_id"]' style="background-color: #ffc107;border:none " />@*data-target="#dialogBindSerialNumber"*@
+                                        @*<input type="button" value="编辑" data-toggle="modal" class="serialNumber_Edit" data-itemId='@dr["item_id"]' style="background-color: #ffc107; border: none " />*@@*data-target="#dialogBindSerialNumber"*@
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @*<div class="card" style="background-color: rgba(236,240,245); border: none;">
+                <div class="boss_table_top mt5 ml15">
+                    <div class="fl mb10" style="font-size: .85rem;">采购订单其他费用</div>
+                </div>
+                <div class="boss_table_body table-responsive">
+                    <table id="tableOrderFee" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th class="w40p">名称</th>
+                                <th class="w20p text-right">费用（元）</th>
+                                <th class="w40p">备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.OrderFeeList != null && Model.OrderFeeList.Count() > 0)
+                            {
+                                foreach (var dr in Model.OrderFeeList)
+                                {
+                                    <tr>
+                                        <td>@dr.name</td>
+                                        <td class="text-right">@dr.fee.ToString().TrimEnd('0').TrimEnd('.')</td>
+                                        <td>@dr.remark</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>*@
+        @*<div class="card">
+                <div class="container-fluid">
+                    <div class="boss_table_top">
+                        <div class="fl mb10">
+                            <label class="mr3 b">采购订单附件</label>
+                        </div>
+                    </div>
+                    <div class="boss_table_body table-responsive">
+                        <ul class="list-group">
+                            @if (Model.OrderFileList != null && Model.OrderFileList.Count() > 0)
+                            {
+                                foreach (var dr in Model.OrderFileList)
+                                {
+                                    <li class="list-group-item"><i class="fa fa-file mr10"></i><a href="@dr.FileUrl">@dr.FileName</a></li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>*@
+    </div>
+
+    <!--绑定序列号对话框-->
+    <div class="modal fade" id="dialogBindSerialNumber" tabindex="-1" role="dialog" aria-labelledby="dialogTitle" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content" style="width:100%; background-color: #ecf0f5;">
+                <div class="modal-header" style="font-family: 'Arial Negreta', 'Arial Normal', 'Arial';font-size:18px; ">
+                    <span class="modal-title" id="dialogTitle">序列号</span>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body fz0875r">
+                    <div style="overflow: hidden">
+                        <table id="tbSerialNumber"></table>
+                    </div>
+
+                    <div style="margin-top:20px">
+                        <div class="w100p mb5">
+                            <input type="file" id="uploadFile" name="File" class="form-control form-control-sm w90p"
+                                   accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                                   xy-required="true" xy-title="请选择文件！" />
+                        </div>
+                        <div class="w100p lh180p lightgray">
+                            <div>仅支持Execl文件，将序列号放在第一列中</div>
+                            <span>如果导入文件较大需要花费稍长时间，请耐心等待。</span><br />
+                            <a href="/resource/序列号.xlsx" download>序列号文件模板示例</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="background-color: #ecf0f5;margin:auto;">
+                    <button type="button" id="btnSubmit" class="btn btn-warning btn-sm w100">确定</button>
+                    @*<button type="button" class="btn btn-secondary btn-sm w100" data-dismiss="modal">返回</button>*@
+                    @*<button type="button" id="btnDelete" class="btn btn-warning btn-sm w100">删除</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+}

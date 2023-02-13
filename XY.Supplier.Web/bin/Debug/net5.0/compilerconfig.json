@@ -1,0 +1,15 @@
+﻿[
+  {
+    "inputFile": "wwwroot/styles/boss.scss",
+    "outputFile": "wwwroot/styles/boss.css"
+  },
+
+  {
+    "inputFile": "wwwroot/scripts/boss.js",
+    "outputFile": "wwwroot/scripts/boss.min.js"
+  },
+  {
+    "inputFile": "wwwroot/scripts/main.js",
+    "outputFile": "wwwroot/scripts/main.min.js"
+  }
+]

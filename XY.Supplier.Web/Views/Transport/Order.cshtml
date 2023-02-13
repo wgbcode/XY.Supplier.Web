@@ -1,0 +1,459 @@
+﻿
+
+@{
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+<style>
+    
+
+    .page-item.active .page-link {
+        z-index: 3;
+        color: #fff;
+        background-color: #409eff !important;
+        border-color: #409eff !important;
+    }
+    .bootstrap-select > select {
+        left: 0;
+    }
+</style>
+
+<script type="text/javascript">
+
+    function step(transport_doc_id) {
+        // 表格页码缓存，详情跳转时添加
+        var page_pre = $('#tablePur').bootstrapTable('getOptions').pageNumber
+        sessionStorage.setItem('pageNumber', page_pre)
+
+        require(['xy', 'boss'], function (xy, boss) {
+            boss.load('/Transport/TransportDoc_Detail?transportDocID=' + transport_doc_id + '&backurl=' + xy.url(true));
+        });
+    }
+
+    require(['jquery', 'bootstrap', 'bootstrapSelect', 'xyvalid', 'boss', 'laydate', 'bootstrapTableLocale', 'layer', 'xy'], function ($, bootstrap, bootstrapSelect, v, boss, laydate, bt, layer, xy) {
+        $(function () {
+
+            var initInfo;
+
+            //页面初始化信息获取方法
+            function LoadBaseInfo() {
+                var initInfo;
+                $.ajax({
+                    type: "get",
+                    url: "/Transport/TransportDoc_BaseInfo",
+                    async: false,
+                    dataType: "json",
+                    success: function (res) {
+                        data = JSON.parse(res)
+                        initInfo = data;
+                    }
+                })
+                return initInfo;
+            }
+            //获取初始化信息
+            initInfo = LoadBaseInfo();
+
+            //下拉框加载数据 
+            function initSelect(initInfo) {
+                $("#orderStatus").html(""); //绑定状态列表下拉菜单
+                $("#orderStatus").append($("<option value=\"ON\">未清</option>"));
+                $("#orderStatus").append($("<option value=\"OY\">未清-未打印</option>"));
+                $("#orderStatus").append($("<option value=\"CN\">已清</option>"));
+                $("#orderStatus").append($("<option value=\"CY\">已取消</option>"));
+
+                $("#fillInStatus").html(""); //绑定回写ERP状态列表下拉菜单
+                $("#fillInStatus").append($("<option value=\"1\">待填写</option>"));
+                $("#fillInStatus").append($("<option value=\"2\">已填写</option>"));
+
+
+                //初始化下拉模糊匹配
+                $('#orderStatus').selectpicker({
+                    noneSelectedText: "单据状态",//默认显示内容
+                    actionsBox: true,
+                    deselectAllText: "清空选择",
+                    selectAllText: "全选",
+                });
+
+                $('#fillInStatus').selectpicker({
+                    noneSelectedText: "填写状态",//默认显示内容
+                    actionsBox: true,
+                    deselectAllText: "清空选择",
+                    selectAllText: "全选",
+                });
+            }
+            //加载下拉框
+            initSelect(initInfo);
+
+            //首次渲染表格
+            LoadReceiptList();
+
+            //点击查询
+            $('#Search').on('click', function () {
+                LoadReceiptList()
+            });
+
+            //表格超出宽度鼠标悬停显示td内容
+            function paramsMatter(value, row, index, field) {
+                var span = document.createElement('span');
+                span.setAttribute('title', value);
+                span.innerHTML = value;
+                return span.outerHTML;
+            }
+            //td宽度以及内容超过宽度隐藏
+            function formatTableUnit(value, row, index) {
+                return {
+                    css: {
+                        "white-space": 'nowrap',
+                        'text-overflow': 'ellipsis',
+                        'overflow': 'hidden',
+                        'max-width': '150px'
+                    }
+                }
+            }
+            //查询收货列表
+            function LoadReceiptList() {
+
+                var transportDocOrder = $("#transportDoc").val();
+                var packingNumber = $("#packingNumber").val();
+
+                var fillInStatusArr = $("#fillInStatus").val();
+                var orderStatusArr = $("#orderStatus").val();
+
+                var fillInStatus = fillInStatusArr.join(',');
+                var orderStatus = orderStatusArr.join(',');
+
+
+                // 表格页码缓存获取，有详情跳转时添加
+                var pageNumber = Number(sessionStorage.getItem('pageNumber'))
+                sessionStorage.removeItem('pageNumber')
+
+                $('#tablePur').bootstrapTable('destroy');
+                $('#tablePur').bootstrapTable({
+                    url: "/Transport/TransportDoc_List",
+                    method: "get",
+                    //contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    pagination: true,                   //是否显示分页（*）
+                    pageNumber: pageNumber || 1,//初始化加载第一页，默认第一页
+                    pageSize: 50,//每页的记录行数（*）
+                    pageList: [10, 30, 50, 100, 500],//可供选择的每页的行数（*）
+                    striped: true,//是否显示行间隔色
+                    sidePagination: "server",
+                    paginationPreText: "<",
+                    paginationNextText: ">",
+                    paginationLoop: false,
+                    height: 800,
+                    //uniqueId: "itemId",
+                    queryParams: function (params) {
+                        return {
+                            transportDocOrder: transportDocOrder,
+                            packingNumber: packingNumber,
+                            fillInStatus: fillInStatus,
+                            orderStatus: orderStatus,
+                            limit: params.limit,
+                            offset: params.offset
+                        };
+                    },
+                    columns: [
+                        //{
+                        //    checkbox: true,
+                        //    width: 10
+                        //},
+                        {
+                            field: 'transport_doc_id',
+                            visible: false
+                        },
+                        {
+                            field: '',
+                            title: '#',
+                            formatter: function (value, row, index) {
+                                var pageSize = $('#tablePur').bootstrapTable('getOptions').pageSize;//通过表的#id 可以得到每页多少条
+                                var pageNumber = $('#tablePur').bootstrapTable('getOptions').pageNumber;//通过表的#id 可以得到当前第几页
+                                return pageSize * (pageNumber - 1) + index + 1;//返回每条的序号： 每页条数 * （当前页 - 1 ）+ 序号
+                            },
+                            width: 30
+                        },
+                        {
+                            field: 'transport_doc_order',
+                            title: '单据编码',
+                            width: '90px',
+                            formatter: setpDetail
+                        },
+                        {
+                            field: 'packing_number',
+                            title: '装箱单号',
+                            cellStyle: formatTableUnit,
+                            formatter: paramsMatter,
+                        },
+                        {
+                            field: 'update_date',
+                            title: '更新时间',
+                            width: '150px',
+                            formatter: (value, row, index) => {
+                                return value.replace(/-/g, '.').replace('T', '   ')
+                            }
+                        },
+                        {
+                            field: 'card_code',
+                            title: '业务伙伴代码',
+                            width: '60px',
+                        },
+                        {
+                            field: 'card_name',
+                            title: '业务伙伴名称',
+                            width: '210px',
+                            cellStyle: formatTableUnit,
+                            formatter: paramsMatter
+                        },
+                        {
+                            field: 'doc_total',
+                            title: '单据总金额',
+                            width: '50px',
+                            align: "right",
+                            formatter: (value, row, index) => {
+                                if (value != "" || value != null) {
+                                    //return value.toLocaleString()
+                                    return numberFilter(value, false)
+                                }
+
+                            }
+                        },
+                        {
+                            field: 'open_doc_total',
+                            title: '未清金额',
+                            width: '50px',
+                            align: "right",
+                            formatter: (value, row, index) => {
+                                if (value != "" || value != null) {
+                                    //return value.toLocaleString()
+                                    return numberFilter(value, false)
+                                }
+
+                            }
+                        },
+                        {
+                            field: 'create_date',
+                            title: '创建时间',
+                            formatter: (value, row, index) => {
+                                return value.replace(/-/g, '.').replace('T', '   ')
+                            },
+                           width: '150px',
+                        },
+                        {
+                            field: 'slpName',
+                            title: '采购员',
+                            width: '70px',
+                        },
+                        {
+                            field: 'comments',
+                            title: '备注',
+                            cellStyle: formatTableUnit,
+                            formatter: paramsMatter,
+                            //width: '100px'
+                        }
+                        ,
+                        {
+                            field: 'status',
+                            title: '状态',
+                            width: '85px',
+                            formatter: (value, row, index) => {
+                                if (value != null) {
+                                    var s = value + row["printed"];
+                                    var str = GetOrderStatus(s);
+                                    return str;
+                                }
+                            },
+                        }
+                        ,
+                        {
+                            field: 'doc_due_date',
+                            title: '交货日期',
+                            width: '90px',
+                            formatter: (value, row, index) => {
+                                return value.replace(/-/g, '.').slice(0, 10)
+                            },
+                        },
+                        {
+                            field: 'transport_status',
+                            title: '填写状态',
+                            width: 50,
+                            formatter: (value, row, index) => {
+                                var data = initInfo.transportStatus;
+                                return data[value]
+                            },
+                        }
+                        //{
+                        //    field: 'transport_status',
+                        //    title: '状态',
+                        //    width: 50 ,
+                        //    formatter: (value, row, index) => {
+                        //        return value.slice(0, 10)
+                        //    }
+                        //}
+                        //{
+                        //    field: 'print_no',
+                        //    title: '电子章流水号',
+                        //    width: 100,
+                        //    formatter: (value, row, index) => {
+                        //        if (value == null) {
+                        //            return ''
+                        //        }
+                        //        return value
+                        //    },
+                        //},
+                        //{
+                        //    field: 'purchase_bill_no',
+                        //    title: '进项发票号',
+                        //    width: 50
+                        //},
+                        //{
+                        //    field: 'pchdocstr',
+                        //    title: '应付发票号',
+                        //    width: 50
+                        //},
+                        //{
+                        //    field: 'printed',
+                        //    title: '打印状态',
+                        //    width: 50
+                        //}
+                    ],
+                    responseHandler: function (res) {
+                        var data = JSON.parse(res)
+                        var objtmp = {
+                            "rows": JSON.parse(data.data),
+                            "total": data.total//总个数
+                        }
+
+                        return objtmp;
+                    },
+                    // 行点击事件
+                    onClickRow: function (row, $element) {
+                    },
+                    // 表格渲染完成事件
+                    onPostBody() {
+                    },
+                    onLoadSuccess(data) {
+                        //boss.tableInit($('#tablePur'));
+                    }
+                });
+            };
+
+            function GetOrderStatus(s) {
+                var str = "";
+                switch (s) {
+                    case "ON":
+                        str = "未清";
+                        break;
+                    case "OY":
+                        str = "未清-已打印";
+                        break;
+                    case "CN":
+                        str = "已清";
+                        break;
+                    case "CY":
+                        str = "已取消";
+                        break;
+                    default:
+                        break;
+                }
+                return str;
+            }
+
+            //点击链接跳转明细
+            function setpDetail(value, row, index) {
+                res = '<img class="detail-icon" onclick="step(' + row.transport_doc_id + ')" src="/images/arrow-right-y.png" /><span>' + value.replace('PO-', '') + '</span>'
+                return res;
+            }
+            //表格超出宽度鼠标悬停显示td内容
+            function paramsMatter(value, row, index) {
+                if (value != null) {
+                    value = value.replaceAll('<br>', '');
+                }
+                var span = document.createElement("span");
+                span.setAttribute("title", value);
+                span.innerHTML = value;
+                return span.outerHTML;
+            }
+            //td宽度以及内容超过宽度隐藏
+            function formatTableUnit(value, row, index) {
+                return {
+                    css: {
+                        "max-width": "180px"
+                    }
+                }
+            }
+
+            // 数字转为千分位，并保留两个小数位
+            function numberFilter(oldNum, isFixed) { // 例（123456.78）
+                if (oldNum === "") return {};
+                let newNum = oldNum.toLocaleString("en-US");
+                const numArr = newNum.split(".");
+                if (!isFixed) {
+                    if (!numArr[1]) { // 如果数组没有下标1的元素，就加.00，例：123,456 = 123,456.00
+                        newNum = newNum + ".00";
+                    } else if (numArr[1].length === 1) { // 如果数组下标1的元素只有一位小数，就加个0，例：123,456.7 = 123,456.70
+                        newNum = newNum + "0";
+                    } else if (numArr[1].length >= 2) { // // 如果数组下标1的元素小数位大于等于2位，就截取前两位，例：123,456.789 = 123,456.78
+                        newNum = numArr[0] + "." + numArr[1].substr(0, 2);
+                    }
+                }
+                return newNum;
+            }
+        });
+    });
+    ///设置默认Enter键触发Search按钮
+    document.onkeydown = function (e) {
+
+        var theEvent = window.event || e;
+        var code = theEvent.keyCode || theEvent.which;
+
+        if (code == 13) {
+            $("#Search").click();
+        }
+    }
+</script>
+
+
+
+<div class="container-fluid">
+    <div class="boss_table_top">
+        <div class="fl mb10">
+            @*<label class="mr3" for="Parent">装箱单号</label>*@
+            <input type="text" id="packingNumber" value="" maxlength="40" class="form-control mr5" style="width:180px;" placeholder="装箱单号" />
+        </div>
+
+        <div class="fl mb10">
+            @*<label class="mr3" for="Parent">物流单号</label>*@
+            <input type="text" id="transportDoc" value="" maxlength="40" class="form-control mr5" style="width: 180px; border-radius: 3px;" placeholder="运费单号" />
+        </div>
+        <div class="fl mb10 mr5" style="width:180px">
+            <select id="orderStatus" name="orderStatus" class="form-control form-control-sm selectpicker"
+                    style="width:auto;min-width:150px;"
+                    data_live_search="true"
+                    data_max_options="1"
+                    multiple=""></select>
+        </div>
+        <div class="fl mb10 mr5" style="width:180px">
+            <select id="fillInStatus" name="fillInStatus" class="form-control form-control-sm selectpicker"
+                    style="width:auto;min-width:150px;"
+                    data_live_search="true"
+                    data_max_options="1"
+                    multiple=""></select>
+        </div>
+        <div class="fl mb10">
+            <button id="Search" type="button" class="btn btn-sm btn-primary mr10" style="border-radius: 3px;">
+                <i class="fa fa-search" aria-hidden="true"></i>
+                <span>查询</span>
+            </button>
+        </div>
+
+        @*<div class="fr">
+            <button id="Print" type="button" class="btn btn-sm btn-warning mb10">
+                <i class="fa fa-print" aria-hidden="true"></i>
+                <span>打印</span>
+            </button>
+        </div>*@
+    </div>
+    <div class="boss_table_body table-responsive">
+        <table id="tablePur" class="table table-bordered table-hover">
+        </table>
+    </div>
+</div>

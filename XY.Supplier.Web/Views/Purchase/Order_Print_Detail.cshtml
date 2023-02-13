@@ -1,0 +1,983 @@
+﻿@using System.Data
+@model XY.Supplier.Web.Models.Purchase.PurchaseOrder_Print_Detail
+
+@{
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+<style>
+    input {
+        padding: 0.14rem 0.5rem !important;
+        border: 1px solid #ced4da !important;
+    }
+
+    .tips {
+        margin-top: 6rem;
+    }
+
+    .tips .tip {
+        margin-bottom: 6px;
+    }
+</style>
+<script type="text/javascript">
+    //<![CDATA[
+
+    // 表格数据
+    var table = [];
+
+    // 是否打印外包装凭证
+    var isPrintOutPackage = false
+
+    var idArray = boss.tableSelectValue($('#tableOrderItem'));
+
+    
+
+    require(['jquery', 'bootstrap', 'bootstrapSelect', 'xyvalid', 'boss', 'laydate', 'bootstrapTableLocale', 'layer', 'xy'], function ($, bootstrap, bootstrapSelect, v, boss, laydate, bt, layer, xy) {
+        $(function () {
+            boss.tableInit($('#tableOrderItem'));
+            //是否客户端变量
+            var isClient = false;
+            try {
+                if (!isObjNull(dotnetPrint)) {
+                    isClient = true;
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+            //打印类型 0:web 1:client
+            //setup();
+            var printType = 0;
+            //客户端使用时显示参数配置按钮
+            try {
+                if (!isObjNull(dotnetPrint)) {
+                    $('#PrintConfig').show();
+                    printType = 1;
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+
+
+            // $('#Print').on('click', function () {
+            //     idArray = [1];
+            //     if (idArray != null && idArray.length > 0) {
+            //         //选中的数据集合
+            //         var table = [];
+            //         console.log("tr:")
+            //         console.log($("#tableAddPrint").find("tr"));
+            //         //遍历数据行
+            //         $("#tableAddPrint").find("tr").each(function () {
+            //             var row = {};
+            //             var isChecked = true;
+            //             console.log($(this).find("td"))
+            //             //遍历数据列
+            //             $(this).find("td").each(function () {
+
+            //                 var input = $(this).find("input");
+            //                 var objName = $(this).attr("name");
+            //                 console.log("input:")
+            //                 console.log(input)
+            //                 console.log("objName:")
+            //                 console.log(objName)
+            //                 var value;
+
+            //                 //未内嵌input则直接取文本值
+            //                 if (input == undefined || input.length <= 0) {
+            //                     value = $(this).text().trim();
+            //                 }
+            //                 else {
+            //                     var type = $(input).attr("type");
+            //                     //判断input type
+            //                     switch (type) {
+            //                         case "checkbox":
+            //                             isChecked = $(input).prop("checked");
+            //                             //未选中
+            //                             if (!isChecked)
+            //                                 return false;
+            //                             value = $(input).val().trim();
+            //                             break;
+            //                         default:
+            //                             value = $(input).val().trim();
+            //                             break;
+            //                     }
+            //                 }
+            //                 console.log("value:")
+            //                 console.log(value)
+            //                 if (objName != undefined && objName.length > 0)
+            //                     eval("row." + objName + "='" + value.replace("'", "\\'") + "'");
+
+            //             });
+
+
+            //             if (!isObjNull(row) ) {
+            //                 //校验标签数量是否超过采购数量
+            //                 var labelQty = parseFloat(row.LabelQty);
+            //                 //var qty = parseFloat(row.Qty);
+            //                 var copies = parseFloat(row.Copies);
+            //                 var rule = parseInt(row.Rule);
+            //                 var errMsg = "";
+            //                 if (isNaN(copies)) {
+            //                     errMsg = "请输入份数！";
+            //                 }
+            //                 if (isNaN(labelQty)) {
+            //                     errMsg = "请输入标签内数量！";
+            //                 }
+            //                 //if (isNaN(qty)) {
+            //                 //    errMsg = "采购数量异常！";
+            //                 //}
+            //                 if (isNaN(rule)) {
+            //                     errMsg = "规则解析异常！";
+            //                 }
+            //                 //if (labelQty <= 0 || labelQty > qty) {
+            //                 //    errMsg = "标签内数量不能小于等于0或不能超过采购数量！";
+            //                 //}
+            //                 if (copies <= 0 || copies >= 1000) {
+            //                     errMsg = "份数必须大于1并小于1000！";
+            //                 }
+            //                 if (errMsg != "") {
+            //                     alert(errMsg);
+            //                     table = [];
+            //                     return false;
+            //                 }
+            //                 table.push(row);
+            //             }
+            //         });
+            //         console.log(table)
+            //         if (table.length <= 0)
+            //             return false;
+            //         console.log(table)
+            //         //将用户输入的标签宽度和高度通过方法传输至后端
+            //         var width = document.getElementById("Width").value;
+            //         var height = document.getElementById("Height").value;
+            //         var para = { purchaseID:@Model.PurchaseID , itemStr: xy.jsonstr(table), width1: width, height1: height };
+
+            //         if (printType === 0) {
+            //             //请求生成二维码
+            //              //print("order_generate_qrcode1", para, webPrint, null);
+            //             //print("order_generate_qrcode", para, webPrint1, null);
+            //             print("order_generate_qrcode", para, PrintFile, null);
+            //         }
+            //         else {
+            //             try {
+            //                 //判断上次打印是否结束
+            //                 if (!dotnetPrint.isPrint()) {
+            //                     $.ajax({
+            //                         type: "post",
+            //                         url: "/purchase/order_qrcode",
+            //                         data: { purchaseID:@Model.PurchaseID , itemStr: xy.jsonstr(table)},
+            //                         contentType: "application/x-www-form-urlencoded",
+            //                         dataType: "json",
+            //                         beforeSend: function () {
+            //                             $("#Print").attr("disabled", true);
+            //                         },
+            //                         success: function (res) {
+            //                             if (res != null) {
+            //                                 //调用打印
+            //                                 dotnetPrint.purchaseItemPrint(res);
+            //                             } else {
+            //                                 alert("调用打印失败！");
+            //                             }
+            //                             $("#Print").attr("disabled", false);
+            //                         },
+            //                         error: function (XMLHttpRequest, textStatus, errorThrown) {
+            //                             console.log(XMLHttpRequest);
+            //                             console.log(textStatus);
+            //                             console.log(errorThrown);
+            //                             alert("打印失败！");
+            //                             $("#Print").attr("disabled", false);
+            //                         }
+            //                     });
+            //                 }
+            //                 else {
+            //                     alert("上一打印任务尚未结束！");
+            //                 }
+            //             }
+            //             catch (error) {
+            //                 alert("网页端打印不需要此设置，请输入标签宽度、高度后点击打印按钮直接打印！");
+            //                 console.log(error);
+            //             }
+            //         }
+            //     }
+            //     else {
+            //         alert('请至少选择一条记录！');
+            //         return false;
+            //     }
+            // });
+
+
+
+            // 展示物料条纹对话框
+            $('#Print').on('click', function () {
+
+                $('#tbOrderPrintInput').bootstrapTable({
+                    clickEdit: true,
+                    columns: [{
+                        checkbox: true
+                    },
+                    {
+                        title: '序列',
+                        field: 'index',
+                        formatter: function (value, row, index) {
+                            return row.index = index + 1;
+                        }
+                    }, {
+                        title: '标签内数量',
+                        field: 'labelQty',
+                    }, {
+                        title: '份数',
+                        field: 'copies',
+                    }, {
+                        title: '备注',
+                        field: 'remark',
+                    }
+                    ],
+                    onClickCell: function (field, value, row, $element) {
+                        $element.attr('contenteditable', true);
+                        $element.blur(function () {
+                            let index = $element.parent().data('index');
+                            let tdValue = $element.html();
+                            saveDataSerialNumber(index, field, tdValue);
+                        })
+                    },
+
+                });
+
+                $('#dialogOrderPrintInput').modal({show:true})
+            });
+
+            // 物料条纹表单新增行
+            $('#addRow').on('click', function () {
+                var row = {
+                    "labelQty": "",
+                    "copies": "",
+                    "remark": "",
+                };
+                $('#tbOrderPrintInput').bootstrapTable('append', row)
+            })
+
+            // 物料条纹表单删除行
+            $('#removeRow').on('click', function () {
+                var rows = $('#tbOrderPrintInput').bootstrapTable('getSelections');
+                if (rows.length == 0) {
+                    layer.msg("请选择要删除的数据");
+                    return;
+                }
+                var indexs = [];
+                for (var i = 0; i < rows.length; i++) {
+                    indexs[i] = rows[i].index;
+                }
+                $('#tbOrderPrintInput').bootstrapTable('remove', {
+                    field: 'index',
+                    values: indexs
+                });
+            })
+
+            //保存物料条纹打印数据，并更新表格数据
+            function saveDataSerialNumber(index, field, tdValue) {
+                $('#tbOrderPrintInput').bootstrapTable('updateCell', {
+                    index: index,
+                    field: field,
+                    value: tdValue
+                })
+            }
+
+
+            // 对表格数据进行校验
+            $('#btnSubmit').on('click', function () {
+                // 拿到表格数据
+                var rows = $('#tbOrderPrintInput').bootstrapTable('getData');
+                console.log('rows', rows)
+
+                // 标签内数量和份数校验
+                if (rows.length === 0) {
+                    layer.msg("物料条码数据为空")
+                    return false
+                }
+                var [checkLabelQty, checkCopiesExit, checkCopiesNum] = [false, false, false];
+                var labelQtys = [];
+                rows.forEach((item) => {
+                    labelQtys.push(item.labelQty)
+                    if (item.labelQty === '') {
+                        checkLabelQty = true
+                    } else if (item.copies === '') {
+                        checkCopiesExit = true;
+                    } else if (item.copies <= 0 || item.copies >= 1000) {
+                        checkCopiesNum = true;
+                    }
+                });
+                if (checkLabelQty) {
+                    layer.msg("标签内数量不能为空")
+                    return false
+                } else if (checkCopiesExit) {
+                    layer.msg("份数不能为空")
+                    return false
+                } else if (checkCopiesNum) {
+                    layer.msg("份数必须大于1并小于1000")
+                    return false
+                }
+
+                // 剩余数据校验
+                checkTableData()
+                
+            })
+
+
+            function checkTableData(){
+                if (idArray != null && idArray.length > 0) {
+                    //选中的数据集合
+                    //遍历数据行
+                    $("#tableOrderItem").find("tr").each(function () {
+                        var row = {};
+                        var isChecked = true;
+                        
+                        // 作用？
+                        //遍历数据列
+                        $(this).find("td").each(function () {
+                            var input = $(this).find("input");
+                            var objName = $(this).attr("name");
+                            var value;
+                            //未内嵌input则直接取文本值
+                            if (input == undefined || input.length <= 0) {
+                                value = $(this).text().trim();
+                            }
+                            else {
+                                var type = $(input).attr("type");
+                                //判断input type
+                                switch (type) {
+                                    case "checkbox":
+                                        isChecked = $(input).prop("checked");
+                                        //未选中
+                                        if (!isChecked)
+                                            return false;
+                                        value = $(input).val().trim();
+                                        break;
+                                    default:
+                                        value = $(input).val().trim();
+                                        break;
+                                }
+                            }
+                            if (objName != undefined && objName.length > 0)
+                                eval("row." + objName + "='" + value.replace("'", "\\'") + "'");
+                        });
+
+                        // 校验
+                        if (!isObjNull(row) && isChecked) {
+                            //校验标签数量是否超过采购数量
+                            //var labelQty = parseFloat(row.LabelQty);
+                            var qty = parseFloat(row.Qty);
+                            //var copies = parseFloat(row.Copies);
+                            var rule = parseInt(row.Rule);
+                            var errMsg = "";
+                            //if (isNaN(copies)) {
+                            //    errMsg = "请输入份数！";
+                            //}
+                            //if (isNaN(labelQty)) {
+                            //    errMsg = "请输入标签内数量！";
+                            //}
+                            if (isNaN(qty)) {
+                                errMsg = "采购数量异常！";
+                            }
+                            if (isNaN(rule)) {
+                                errMsg = "规则解析异常！";
+                            }
+                            labelQtys.forEach((labelQty) => {
+                                if (labelQty <= 0 || labelQty > qty) {
+                                    errMsg = "标签内数量不能小于等于0或不能超过采购数量！";
+                                }
+                            })
+                            //if (copies <= 0 || copies >= 1000) {
+                            //    errMsg = "份数必须大于1并小于1000！";
+                            //}
+                            if (errMsg != "") {
+                                //alert(errMsg);
+                                layer.msg(errMsg);
+                                table = [];
+                                return false;
+                            }
+                            table.push(row);
+                        }
+                    });
+                }else {
+                    //alert('请至少选择一条记录！');
+                    layer.msg("请至少选择一条记录！");
+                    return false;
+                }
+            }
+
+
+
+            // 外包装弹框
+            function showPrintOutPackgae(){
+                layer.confirm('是否需要打印外包装标签', {
+                    title: "提示",
+                    icon: 3,
+                    closeBtn: 0,
+                    btn: ['是', '否'],
+                    shade: 0.3,
+                    cancel: function (index, layero) {
+                        //console.log('关闭x号');
+                    }, //按钮
+                }, function () {
+                    isPrintOutPackage = true;
+                    layer.closeAll(); //关闭所有层
+                    PrintLabel(labelQtys)
+                    
+                }, function () {
+                    //layer.msg('否', { icon: 1 });
+                    isPrintOutPackage = false;
+                    PrintLabel(labelQtys)
+                })
+            };
+
+
+            function PrintLabel(labelQtys) {
+                var idArray = boss.tableSelectValue($('#tableOrderItem'));
+                if (idArray != null && idArray.length > 0) {
+                    if (table.length <= 0)
+                        return false;
+                    //将用户输入的标签宽度和高度通过方法传输至后端
+                    var width = document.getElementById("Width").value;
+                    var height = document.getElementById("Height").value;
+                    var para = { purchaseID:@Model.PurchaseID , itemStr: xy.jsonstr(table), width1: width, height1: height, isPrintOutPackage: isPrintOutPackage };
+
+                    if (printType === 0) {
+                        //请求生成二维码
+                         //print("order_generate_qrcode1", para, webPrint, null);
+                        //print("order_generate_qrcode", para, webPrint1, null);
+                        print("order_generate_qrcode", para, PrintFile, null);
+                    }
+                    else {
+                        try {
+                            //判断上次打印是否结束
+                            if (!dotnetPrint.isPrint()) {
+                                $.ajax({
+                                    type: "post",
+                                    url: "/purchase/order_qrcode",
+                                    data: { purchaseID:@Model.PurchaseID , itemStr: xy.jsonstr(table)},
+                                    contentType: "application/x-www-form-urlencoded",
+                                    dataType: "json",
+                                    beforeSend: function () {
+                                        $("#Print").attr("disabled", true);
+                                    },
+                                    success: function (res) {
+                                        if (res != null) {
+                                            //调用打印
+                                            dotnetPrint.purchaseItemPrint(res);
+                                        } else {
+                                            //alert("调用打印失败！");
+                                            layer.msg("调用打印失败");
+                                        }
+                                        $("#Print").attr("disabled", false);
+                                    },
+                                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                        console.log(XMLHttpRequest);
+                                        console.log(textStatus);
+                                        console.log(errorThrown);
+                                        alert("打印失败！");
+                                        $("#Print").attr("disabled", false);
+                                    }
+                                });
+                            }
+                            else {
+                                alert("上一打印任务尚未结束！");
+                            }
+                        }
+                        catch (error) {
+                            alert("网页端打印不需要此设置，请输入标签宽度、高度后点击打印按钮直接打印！");
+                            console.log(error);
+                        }
+                    }
+                }
+            }
+
+
+
+
+            function PrintFile(res) {
+                //图片打印
+                printJS({
+                    printable: res,
+                    type: 'image'
+                    //style: '{size:auto;margin: 0cm 0cm 0cm 0cm;}' //去除页眉页脚
+                });
+            }
+
+            //打印参数设置
+            $('#PrintConfig').on('click', function () {
+                //请求生成二维码
+                    try {
+                        dotnetPrint.openConfigSetting();
+                    }
+                    catch (error) {
+                        alert("网页端打印不需要此设置，请输入标签宽度、高度后点击打印按钮直接打印！");
+                        console.log(error);
+                    }
+            });
+            var selected_device;
+
+            var errorCallback = function (errorMessage) {
+                alert("错误: 未能成功连接到打印机，请检查！");
+                    }
+            var errorCallback1 = function (errorMessage) {
+                    }
+
+            //斑马打印机用
+            function setup() {
+                if (!isClient) {
+                    //首先从应用程序中获取默认设备。
+
+                    BrowserPrint.getDefaultDevice("printer", function (device) {
+                        //添加设备
+                        selected_device = device;
+                    }, function (error) {
+                        alert("软件连接失败，请检查右下角是否启动了Zebra Browser Print");
+                    })
+                }
+            }
+            //返回
+            $('#Cancel').on('click', function () {
+                window.location.href = '@Html.Raw(Model.Backurl)';
+            });
+
+            //采购订单物料表格单击选中事件(单选或多选)
+            $('#tableOrderItem').find("input:checkbox").on('click', function () {
+                //全选
+                if ($(this).parent().is('th')) {
+                    var isChecked = this.checked;
+                    if (isChecked) {
+                        $(".label-qty").show();
+                    }
+                    else {
+                        $(".label-qty").hide();
+                    }
+                }
+                //单选
+                else {
+                    if ($(this).is(':checked')) {
+                        $(this).parent().parent().find("td input:eq(1)").show();
+                        $(this).parent().parent().find("td input:eq(2)").show();
+                        $(this).parent().parent().find("td input:eq(3)").show();
+                        $(this).parent().parent().find("td input:eq(4)").show();
+                    }
+                    else {
+                        $(this).parent().parent().find("td input:eq(1)").hide();
+                        $(this).parent().parent().find("td input:eq(2)").hide();
+                        $(this).parent().parent().find("td input:eq(3)").hide();
+                        $(this).parent().parent().find("td input:eq(4)").hide();
+                    }
+                }
+            });
+
+            //打印
+            /*
+                * apiName : 接口名
+                * table : 物料参数集合
+                * callback : 打印操作
+                * client : 如果是客户端打印则需传入客户端打印对象
+            */
+            function print(apiName, para, callback, client) {
+                $.ajax({
+                    type: "post",
+                    url: "/purchase/" + apiName,
+                    data: para,
+                    contentType: "application/x-www-form-urlencoded",
+                    dataType: "json",
+                    beforeSend: function () {
+                        $("#Print").attr("disabled", true);
+                    },
+                    success: function (res) {
+                        if (res != null) {
+                            //调用打印
+                            if (client == null)
+                                callback(res);
+                            else
+                                callback(res, client);
+                        } else {
+                            alert("打印失败！");
+                        }
+                        $("#Print").attr("disabled", false);
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        console.log(XMLHttpRequest);
+                        console.log(textStatus);
+                        console.log(errorThrown);
+                        alert("打印失败！");
+                        $("#Print").attr("disabled", false);
+                    }
+                });
+            }
+            //web端打印
+            function webPrint1(res) {
+                //遍历List表中所有图片的ASCii码
+                //$.each(res, function (index, value) {
+                //    window.open(value, '_blank').location;
+                //});
+
+                //图片打印
+                printJS({
+                    printable: res,
+                    type: 'image'
+                });
+            }
+            //web端打印
+            function webPrint(res) {
+                //将要打印的图像发至打印机
+                //$.each(res, function (index, value) {
+                //    var printString1 = value;
+                //    selected_device.send(printString1, undefined, errorCallback1);
+                //});
+                //$.each(res, function (index, value) {
+                //    var printString2 = value;
+                //    selected_device.send(printString2, undefined, errorCallback1);
+                //});
+                //$.each(res, function (index, value) {
+                //    var printString3 = value;
+                //    selected_device.send(printString3, undefined, errorCallback1);
+                //});
+                //$.each(res, function (index, value) {
+                //    var printString4 = value;
+                //    selected_device.send(printString4, undefined, errorCallback1);
+                //});
+                //$.each(res, function (index, value) {
+                //    var printString5 = value;
+                //    selected_device.send(printString5, undefined, errorCallback1);
+                //});
+                //$.each(res, function (index, value) {
+                //    var printString6 = value;
+                //    selected_device.send(printString6, undefined, errorCallback1);
+                //});
+
+                //便利List表中所有图片的ASCii码
+                $.each(res, function (index, value) {
+                    var printString9 = "^XA^FO0,0^XGR:ZLOGO" + index + ".GRF,1,1^FS^XZ";//调用该模板指令生成ZPL指令
+                    console.log(printString9)
+                    selected_device.send(printString9, undefined, errorCallback);//发送ZPL指令调用打印方法打印所需要的图像
+                });
+            }
+
+            //客户端打印
+            function clientPrint(res, client) {
+                client.purchaseItemPrint(res);
+            }
+            //双击选择/取消选择
+            $('#tableOrderItem').find("tr").each(function () {
+                var tr = $(this);
+                tr.dblclick(function () {
+                    var rowCheckbox = tr.find("input:checkbox").first();
+                    if (rowCheckbox.length > 0) {
+                        if (rowCheckbox.is(":checked")) {
+                            //显示
+                            tr.find("td input:eq(1)").show();
+                            tr.find("td input:eq(2)").show();
+                            tr.find("td input:eq(3)").show();
+                            tr.find("td input:eq(4)").show();
+                        }
+                        else {
+                            //隐藏
+                            tr.find("td input:eq(1)").hide();
+                            tr.find("td input:eq(2)").hide();
+                            tr.find("td input:eq(3)").hide();
+                            tr.find("td input:eq(4)").hide();
+                        }
+                    }
+                });
+            });
+
+            //判断对象是否为NULL
+            function isObjNull(obj) {
+                return Object.prototype.isPrototypeOf(obj) && Object.keys(obj).length === 0;
+            }
+
+
+            /// 22.10.20 供应商编码版本打印
+
+            @*//添加选择打印
+            $('#AddPrint').on('click', function () {
+                var idArray = boss.tableSelectValue($('#tableOrderItem'));
+                console.log(idArray);
+                if (idArray != null && idArray.length > 0) {
+                    //选中的数据集合
+                    var table = [];
+                    //遍历数据行
+                    $("#tableOrderItem").find("tr").each(function () {
+                        var row = {};
+                        var isChecked = true;
+                        //遍历数据列
+                        $(this).find("td").each(function () {
+                            var input = $(this).find("input");
+                            var objName = $(this).attr("name");
+                            var value;
+                            //未内嵌input则直接取文本值
+                            if (input == undefined || input.length <= 0) {
+                                value = $(this).text().trim();
+                            }
+                            else {
+                                var type = $(input).attr("type");
+                                //判断input type
+                                switch (type) {
+                                    case "checkbox":
+                                        isChecked = $(input).prop("checked");
+                                        //未选中
+                                        if (!isChecked)
+                                            return false;
+                                        value = $(input).val().trim();
+                                        break;
+                                    default:
+                                        value = $(input).val().trim();
+                                        break;
+                                }
+                            }
+                            if (objName != undefined && objName.length > 0)
+                                eval("row." + objName + "='" + value.replace("'", "\\'") + "'");
+                        });
+                        if (!isObjNull(row) && isChecked) {
+                            //校验标签数量是否超过采购数量
+                            var labelQty = parseFloat(row.LabelQty);
+                            var qty = parseFloat(row.Qty);
+                            var copies = parseFloat(row.Copies);
+                            var rule = parseInt(row.Rule);
+                            var errMsg = "";
+                            if (isNaN(copies)) {
+                                errMsg = "请输入份数！";
+                            }
+                            if (isNaN(labelQty)) {
+                                errMsg = "请输入标签内数量！";
+                            }
+                            if (isNaN(qty)) {
+                                errMsg = "采购数量异常！";
+                            }
+                            if (isNaN(rule)) {
+                                errMsg = "规则解析异常！";
+                            }
+                            if (labelQty <= 0 || labelQty > qty) {
+                                errMsg = "标签内数量不能小于等于0或不能超过采购数量！";
+                            }
+                            if (copies <= 0 || copies >= 1000) {
+                                errMsg = "份数必须大于1并小于1000！";
+                            }
+                            if (errMsg != "") {
+                                alert(errMsg);
+                                table = [];
+                                return false;
+                            }
+                            table.push(row);
+                        }
+                    });
+                    if (table.length <= 0)
+                        return false;
+
+                    $('#PrintModal').modal();
+                    ShowPrintInfo(table);
+                }
+                else {
+                    alert('请至少选择一条记录！');
+                    return false;
+                }
+            });*@
+
+
+
+            function ShowPrintInfo(table) {
+                var data = [];
+                var index = 1;
+                for (var i = 0; i < table.length; i++) {
+                    var itemID = table[i]["ItemID"];
+                    var itemCode = table[i]["ItemCode"];
+                    var labelQty = table[i]["LabelQty"];
+                    var copies = table[i]["Copies"];
+                    var remark = table[i]["remark"];
+                    var rule = table[i]["Rule"];
+                    for (var x = 0; x < copies; x++) {
+                        index += x;
+                        var tr = { Index: index, ItemID: itemID, ItemCode: itemCode, LabelQty: labelQty, Copies: 1, remark: remark, Rule: rule}
+                        data.push(tr);
+
+                    }
+                }
+
+
+                var tablePrintThead = '<thead>                                                                ' +
+                    '    <tr>                                                               ' +
+                    '        <th class="w2p">序号</th>  ' +
+                    '        <th class="w10p">供应商SN码</th>                                     ' +
+                    '        <th class="w10p">编码</th>                                     ' +
+                    '        <th class="w20p">备注</th>                                     ' +
+                    '        <th class="w10p text-right">标签内数量</th>                    ' +
+                    '        <th class="w10p text-right">份数</th>                          ' +
+                    '    </tr>                                                              ' +
+                    '</thead>                                                               ';
+
+
+                var tablePrintTBody = '<tbody>';
+                for (var i = 0; i < data.length; i++) {
+                    var row = data[i];
+                    tablePrintTBody += '<tr style="height:40px;">' +
+                        '<td >'+ row.Index + '</td>' +
+                        '<td name="ItemID" style="display:none"><input  value="' + row.ItemID + '" style="display:none" /></td>' +
+                        '<td name="SupplierSN"><input  value=""  placeholder="请填写供应商SN码" /></td>' +
+                        '<td name="ItemCode">' + row.ItemCode+'</td>'+
+                        '<td name="remark"><input type="text" class="w100p" value="' + row.remark + '" /></td>' +
+                        '<td name="LabelQty"><input type="number" class="label-qty text-right w100p" value="' + row.LabelQty + '" readonly="readonly"  /></td>' +
+                        '<td name="Copies"><input type="number"  class="label-qty text-right w100p" value="' + row.Copies +'" readonly="readonly" /></td>' +
+                        '<td name="Rule" style="display:none"><input type="number" value="' + row.Rule + '" /></td>' +
+                        '</tr>';
+                }
+                tablePrintTBody +='</tbody>'
+
+                var tablePrintHtml = tablePrintThead + tablePrintTBody;
+                $('#tableAddPrint').html(tablePrintHtml);
+
+            };
+
+            
+
+        });
+    });
+
+    //]]>
+</script>
+
+<div class="container-fluid">
+    <div class="boss_table_top clearfix">
+        <div class="fl mb10">
+            <label class="mr3 b" style="color: #000; font-size: .95rem;">物料条码打印</label>
+        </div>
+        <div class="fr mb10">
+            <div class="fl mb10">
+                <label class="mr3" for="Width">标签宽度（mm）:</label>
+                <input type="number" id="Width" value="90" step="1" class="mr3" style="width:200px;" placeholder="请输入标签宽度" />
+            </div>
+            <div class="fl mb10">
+                <label class="mr3" for="Height">标签高度（mm）:</label>
+                <input type="number" id="Height" value="40" step="1" class="mr3" style="width:200px;" placeholder="请输入标签高度" />
+            </div>
+            <button id="Print" type="button" class="btn btn-sm btn-warning">
+                <i class="fa fa-print" aria-hidden="true"></i>
+                <span>打印</span>
+            </button>
+            <button id="PrintConfig" type="button" class="btn btn-sm btn-warning">
+                <i class="fa fa-cog" aria-hidden="true"></i>
+                <span>客户端打印参数设置</span>
+            </button>
+            <button id="Cancel" type="button" class="btn btn-sm btn-warning">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                <span>返回</span>
+            </button>
+        </div>
+    </div>
+    <div class="boss_table_body table-responsive">
+        <table id="tableOrderItem" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th class="w2p"><input id="SelectAll" type="checkbox" /></th>
+                    <th class="w10p">名称</th>
+                    <th class="w10p">编码</th>
+                    <th class="w20p">备注</th>
+                    <th class="w10p text-right">数量</th>
+                    <th class="w10p text-right">标签内数量</th>
+                    <th class="w10p text-right">份数</th>
+                    @*<th class="w10p text-right">部门</th>*@
+                    <th class="w10p">规则</th>
+                    @*<th class="w10p text-right">包装尾数</th>*@
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.OrderItemList != null && Model.OrderItemList.Rows.Count > 0)
+                {
+                    foreach (DataRow dr in Model.OrderItemList.Rows)
+                    {
+                        <tr>
+                            <td name="ItemID"><input type="checkbox" value="@(dr["item_id"])" /></td>
+                            <td name="ItemName">@dr["name"]</td>
+                            <td name="ItemCode">@dr["code"]</td>
+                            <td name="remark"><input type="text" class="w100p" style="display:none;" /></td>
+                            <td name="Qty" class="text-right">@dr["item_qty"].ToString().TrimEnd('0').TrimEnd('.')</td>
+                            @if ((dr["rule"].ToString() == "1"))
+                            {
+                                <td name="LabelQty"><input type="number" class="label-qty text-right w100p" value="1" readonly="readonly" style="display:none;" /></td>
+                            }
+                            else
+                            {
+                                <td name="LabelQty"><input type="number" step="1" class="label-qty text-right w100p" style="display:none;" /></td>
+                            }
+                            <td name="Copies"><input type="number" step="1" class="label-qty text-right w100p" value=@((dr["rule"].ToString()=="0")?1:null) style="display:none;" /></td>
+
+                            <td>@(XY.Enums.boss.Tools.item_rule((XY.Enums.boss.item_rule)dr["rule"]))</td>
+                            <td name="Rule" style="display:none"><input type="number" value=@(dr["rule"]) /></td>
+                        </tr>
+
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tips">
+        <p class="tip">温馨提示</p>
+        <p class="tip">1.打印标签时，若外箱包装内物料无小包装，则点击打印标签时，不需要打印外包装标签</p>
+        <p class="tip">2.若外箱包装内物料有小包装，则标签内数量为小包装内物料数量，份数为小包装数量，并且点击打印后需要选择外包装标签</p>
+    </div>
+</div>
+
+
+<!--物料条码打印对话框-->
+<div class="modal fade" id="dialogOrderPrintInput" tabindex="-1" role="dialog" aria-labelledby="dialogTitle" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" style="width:100%; background-color: #ecf0f5;">
+            <div class="modal-header" style="font-family: 'Arial Negreta', 'Arial Normal', 'Arial';font-size:18px; ">
+                <span class="modal-title" id="dialogTitle">物料条码打印</span>
+                <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body fz0875r">
+                <div style="margin-bottom:15px;">
+                    <button type="button" id="addRow" class="btn btn-warning btn-sm w100">添加行</button>
+                    <button type="button" id="removeRow" class="btn btn-secondary btn-sm w100">删除行</button>
+                </div>
+                <div style="overflow: hidden">
+                    <table id="tbOrderPrintInput"></table>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: #ecf0f5;margin:auto;">
+                <button type="button" id="btnSubmit" class="btn btn-warning btn-sm w100">确定</button>
+                <button type="button" class="btn btn-secondary btn-sm w100" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*模态框*@
+@*<div class="modal fade" id="PrintModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width:1200px;height:auto;margin-left:-50%">
+                <div class="modal-body">
+                    <div class="form-inline row" style="margin-left: 10px; margin-bottom: 20px">
+
+                    </div>
+
+                    <table id="tableAddPrint" style="table-layout: fixed; word-break: break-all; word-wrap: break-word;"></table>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-inline row justify-content-center" style="width:100%;margin-bottom:10px">
+                        <div class="form-group">
+                            <div class="col-sm-1">
+                                <button type="button" class="btn btn-sm btn-warning" data-dismiss="modal" style="width:100px"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>关闭</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+
+                             <div class="col-sm-1">
+                                <button id="Print" type="button" class="btn btn-sm btn-warning" style="width:100px">
+                                    <span>打印</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@

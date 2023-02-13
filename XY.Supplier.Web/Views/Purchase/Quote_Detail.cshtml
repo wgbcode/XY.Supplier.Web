@@ -1,0 +1,237 @@
+﻿@using System.Data
+@using XY.Supplier.Web
+@model XY.Supplier.Web.Models.Purchase.Quote_Detail_Model
+
+@{
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+
+<script type="text/javascript">
+    //<![CDATA[
+
+    require(['jquery', 'xy', 'xyvalid', 'boss', 'laydate'], function ($, xy, v, boss, laydate) {
+        $(function () {
+            boss.tableInit($('#tableOrderItem'));
+            //初始化日期样式
+            laydate.render({
+                elem: '#Promise',
+                theme: boss.configPrimaryColor,
+                type: 'datetime'
+            });
+            var _form = $('form:first');
+            _form.xyvInit();
+
+            var idArray = new Array();
+            var price_array = new Array();
+            //点击返回
+            $('#Cancel').on('click', function () {
+                boss.load('@Html.Raw(Model.BackUrl)');
+            });
+            //提交报价
+            $('#Submit').on('click', function () {
+                var time = $("#Promise").val();
+                if (time.length == 0) {
+                    alert('请选择送达时间');
+                    return false;
+                }
+                price_array = [];
+                idArray = [];
+                var tab = document.getElementById('tableOrderItem');
+                var rows = tab.rows;
+                for (var i = 1; i < rows.length; i++) {
+                    for (var j = 0; j < rows[i].cells.length; j++) {
+                        if (j == 0) {
+                            var check = rows[i].getElementsByTagName('input')[0];
+                            idArray.push(check.value);
+                            var num = rows[i].getElementsByTagName('input')[1];
+                            if (num.value.length = 0 || num.value.match(/^[ ]*$/)) {
+                                price_array.push(0);
+                            }
+                            else {
+                                price_array.push(num.value);
+                            }
+                        }
+                    }
+                }
+                if (price_array.length == idArray.length) {
+                    var supplier_id = @Model.Supplier_Id;
+                    var pi_id = @Model.Inquiry_Id;
+                    var all_data = {
+                        Deliver_time: JSON.stringify($("#Promise").val()),
+                        SupplierId: JSON.stringify(supplier_id),
+                        InquiryId: JSON.stringify(pi_id),
+                        InquiryItemIds: JSON.stringify(idArray),
+                        PriceNums: JSON.stringify(price_array)
+                    }
+                    $.ajax({
+                    type: "post",
+                    url: "/purchase/Quote_Insert",
+                    data: all_data,
+                    dataType: "json",
+                    beforeSend: function () {
+                        $("#Submit").attr("disable", true);
+                    },
+                    success: function (res) {
+                        if (res > 0) {
+                            alert("创建成功！");
+                            boss.load('@Html.Raw("/purchase/quote")');
+                        } else {
+                            alert("参数解析失败！")
+                        }
+                    }
+                })
+                } else {
+                    alert("参数错误！");
+                    return false;
+                }
+            });
+        });
+    });
+
+    //]]>
+</script>
+
+@using (Html.BeginForm())
+{
+
+
+    <div class="container-fluid">
+        <div class="fl w100p">
+            @if (!Model.IsQuote)
+            {
+                <button id="Submit" type="button" class="btn btn-sm btn-warning mb10 fr ">
+                    <i class="fas fa-save" aria-hidden="true"></i>
+                    <span>提交报价</span>
+                </button>
+            }
+            <button id="Cancel" type="button" class="btn btn-sm btn-warning mb10 fr mr10">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                <span>返回</span>
+            </button>
+        </div>
+        <div class="card">
+            <div class="card-header b">询价单详情</div>
+            <div class="card-body">
+                <div class="row justify-content-center mt1r mb05r">
+                    <div class="col-xl-1 gray">询价订单号</div>
+                    <div class="col-xl-4">@(Model.Order_No)</div>
+                    <div class="col-xl-1 gray">发起人</div>
+                    <div class="col-xl-4">
+                        @(Model.Creator_Name)
+                    </div>
+                </div>
+                <div class="row justify-content-center mb05r">
+                    <div class="col-xl-1 gray">发布时间</div>
+                    <div class="col-xl-4">@(Model.Create_time.ToString("yyyy.MM.dd HH:mm:ss"))</div>
+                    <div class="col-xl-1 gray">报价截止时间</div>
+                    <div class="col-xl-4">@(Model.End_time.ToString("yyyy.MM.dd HH:mm:ss"))</div>
+                </div>
+                <div class="row justify-content-center mb05r">
+                    <div class="col-xl-1 gray">状态</div>
+                    <div class="col-xl-4">@(Model.Status)</div>
+                    <div class="col-xl-1 gray">要求交货时间</div>
+                    <div class="col-xl-4">@Model.Deliver_time.ToString("yyyy.MM.dd HH:mm:ss")</div>
+                </div>
+                <div class="row justify-content-center mb05r">
+                    <div class="col-xl-1 gray">备注</div>
+                    <div class="col-xl-4 oneLine" title="@(Model.Remark)">@(Model.Remark)</div>
+                    <div class="col-xl-1 gray"><span class="fl red b pt0125r">*</span>承诺送达时间</div>
+                    @if (Model.IsQuote)
+                    {
+                        <div class="col-xl-4"> @Model.Promise_Deliver_time.Value.ToString("yyyy.MM.dd hh:mm:ss")</div>
+                    }
+                    else
+                    {
+                        <div class="col-xl-4">
+                            <input id="Promise" value="" type="text" maxlength="19" autocomplete="off" class="form-control cp " style="width:40%;padding-left:2px;" />
+                        </div>
+                    }
+
+                </div>
+            </div>
+            <div class="card" style="background-color: rgba(236,240,245); border: none;">
+                <div class="boss_table_top mt10 ml15">
+                    <div class="fl mb10 subtitle" style="font-size: .85rem;">询价单包含物料</div>
+                </div>
+                <div class="boss_table_body table-responsive">
+                    <table id="tableOrderItem" class="table table-bordered table-hover" style="width: 30rem;">
+                        <thead>
+                            <tr>
+                                <th class="w1p" style="display:none;"><input id="SelectAll" type="checkbox" /></th>
+                                <th class="w3p">#</th>
+                                @*<th class="w10p">物料</th>*@
+                                <th class="w10p">物料编码</th>
+                                <th class="w10p">物料分类</th>
+                                <th class="w10p">数量（PCS）</th>
+                                @*<th class="w20p">上一次采购价（RMB）</th>*@
+                                <th class="w20p">本次报价（RMB）</th>
+                                <th class="w20p text-right">图纸</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Item_List != null && Model.Item_List.Count() > 0)
+                            {
+                                var ii = 0;
+                                var pages = Convert.ToInt32(XY.Http.QueryString(Context.Request, "page", "1"));
+                                var pagesize = Convert.ToInt32(XY.Http.QueryString(Context.Request, "pagesize", "30"));
+                                foreach (DataRow dr in Model.Item_List)
+                                {
+                                    ii++;
+                                    string fileIds = dr["fileIds"].ToString();
+                                    string fileNames = dr["fileNames"].ToString();
+                                    string[] fileIdArr = fileIds.Split(",");
+                                    string[] fileNameArr = fileNames.Split(",");
+                                    string pdfHtml = "";
+
+                                    if (!string.IsNullOrEmpty(fileIds))
+                                    {
+                                        for (int i = 0; i < fileIdArr.Length; i++)
+                                        {
+                                            string fileId = fileIdArr[i];
+                                            string fileName = fileNameArr[i];
+                                            if (!string.IsNullOrEmpty(pdfHtml))
+                                            {
+                                                pdfHtml += "<br />";
+                                            }
+                                            string fileUrl = XY.Business.Tools.FileUrl(XY.Boss.Configs.FileSiteURL, int.Parse(fileId), "pdf");
+                                            pdfHtml += "<a href='" + fileUrl + "' target='_blank'>" + fileName + "</a>";
+
+                                        }
+
+                                    }
+
+                            <tr>
+                                <td style="display:none;"><input type="checkbox" value="@(dr["pii_id"].ToString())" /></td>
+                                <td>@(((pages - 1) * pagesize + ii).ToString())</td>
+                                @*<td>@dr["name"]</td>*@
+                                <td>@dr["code"]</td>
+                                <td>@dr["cate_name"]</td>
+                                <td align="right">@(((decimal)dr["item_qty"]).ToString("#0.00"))</td>
+                                @*<td>@(((decimal)dr["last_price"]).ToString("#0.00"))</td>*@
+                                @if (Model.IsQuote)
+                                {
+                                    <td align="right">
+                                        @((dr["price"] == System.DBNull.Value || (decimal)dr["price"] == 0) ? "未报价" : ((decimal)dr["price"]).ToString("#0.00"))
+                                    </td>
+
+                                }
+                                else
+                                {
+                                    <td>
+                                        <input type="text" style="width: 100%;border: none; text-align: right;" value=" " autocomplete="off"
+                                               onchange="this.setAttribute('value',$.trim(this.value));"
+                                               onkeyup="value=value.replace(/[^1-9]{0,1}(\d*(?:\.\d{0,6})?).*$/g, '$1')" />
+                                    </td>
+                                }
+                                <td>@Html.Raw(pdfHtml)</td>
+                            </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        @Html.Pager(XY.Http.RequestUrl(Context.Request), Model.Item_List)
+    </div>
+}

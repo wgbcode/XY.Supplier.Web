@@ -1,0 +1,132 @@
+﻿@using XY.Supplier.Web
+@model XY.Supplier.Web.Models.Purchase.Quote_Model
+
+@{
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+
+<script type="text/javascript">
+    //<![CDATA[
+
+    function step(ID,pqID) {
+        require(['xy', 'boss'], function (xy, boss) {
+            boss.load('/purchase/Quote_Detail?inquiryID=' + ID + '&quoteID=' + pqID + '&backurl=' + xy.url(true));
+        });
+    }
+
+    require(['jquery', 'xy', 'boss', 'bootstrap', 'bootstrapSelect', 'laydate'], function ($, xy, boss, bootstrap, bootstrapSelect, laydate) {
+        $(function () {
+            //初始化日期样式
+            var dBegin = '@(DateTime.Now.AddMonths(-1).ToString("yyyy.MM.dd 00:00:00"))'
+            var dEnd = '@(DateTime.Now.ToString("yyyy.MM.dd 23:59:59"))'
+
+            //初始化日期样式
+            laydate.render({
+                elem: '#Begin',
+                theme: boss.configPrimaryColor,
+                type: 'datetime',
+                value: dBegin,
+                format: 'yyyy.MM.dd HH:mm:ss'
+            });
+            laydate.render({
+                elem: '#End',
+                theme: boss.configPrimaryColor,
+                type: 'datetime',
+                value: dEnd,
+                format: 'yyyy.MM.dd HH:mm:ss'
+            });
+            boss.tableInit($('#tablePur'));
+
+            //点击查询
+            $('#Search').on('click', function () {
+                boss.load("/purchase/quote?status=" + $("#OrderStatus").val() + "&userId=" + $("#UserId").val() + "&orderKey=" + $("#OrderKey").val()
+                    + "&begin=" + xy.urlencode($("#Begin").val()) + "&end=" + xy.urlencode($("#End").val())  + "&pagesize=" + $("#Pagesize").val() + '&backurl=' + xy.url(true));
+            });
+
+            //初始化下拉模糊匹配
+            $('.selectpicker').selectpicker();
+        });
+    });
+
+    //]]>
+</script>
+
+<div class="container-fluid">
+    <div class="boss_table_top">
+        <div class="fl mb10">
+            <label class="mr3" for="Parent">询价单号</label>
+            <input type="text" id="OrderKey" value="@(Model.OrderKey)" maxlength="64" class="form-control mr5" style="width:100px;" placeholder="询价单号" />
+        </div>
+        <div class="fl mb10">
+            <label class="mr3" for="UserId">发起人</label>
+            <div class="fl mr5" style="width:220px;">
+                @Html.DropDownList("UserId", Model.UserList, new
+                {
+                    @class = "form-control form-control-sm selectpicker",
+                    style = "width:auto;min-width:100px;",
+                    data_live_search = "true"
+                })
+            </div>
+        </div>
+        <div class="fl mb10">
+            <label for="Begin" class="mr3">发布时间</label>
+            <input id="Begin" value="@(Model.Begin)" type="text" maxlength="19" autocomplete="off" class="form-control cp mr3" style="width:160px;" />
+        </div>
+        <div class="fl mb10">
+            <label for="End" class="mr3">至</label>
+            <input id="End" value="@(Model.End)" type="text" maxlength="19" autocomplete="off" class="form-control cp mr5" style="width:160px;" />
+        </div>
+        <div class="fl mb10">
+            <label class="mr3" for="OrderStatus">状态</label>
+            @Html.DropDownList("OrderStatus", Model.OrderStatusList, new
+            {
+                @class = "form-control form-control-sm mr5",
+                style = "width:auto;min-width:100px;"
+            })
+        </div>
+        <div class="fl mb10">
+            <button id="Search" type="button" class="btn btn-sm btn-primary">
+                <i class="fa fa-search" aria-hidden="true"></i>
+                <span>查询</span>
+            </button>
+        </div>
+    </div>
+    <div class="boss_table_body table-responsive">
+        <table id="tablePur" class="table table-bordered table-hover" style="width: 30rem;">
+            <thead>
+                <tr>
+                    <th class="w1p"><input id="SelectAll" type="checkbox" /></th>
+                    <th class="w3p">#</th>
+                    <th class="w10p">询价单号</th>
+                    <th class="w10p">发起人</th>
+                    <th class="w10p">发布时间</th>
+                    <th class="w10p">截止时间</th>
+                    <th class="w10p">状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.OrderList != null && Model.OrderList.Count() > 0)
+                {
+                    var i = 0;
+                    var pages = Convert.ToInt32(XY.Http.QueryString(Context.Request, "page", "1"));
+                    var pagesize = Convert.ToInt32(XY.Http.QueryString(Context.Request, "pagesize", "30"));
+                    foreach (var dr in Model.OrderList)
+                    {
+                        i++;
+                <tr>
+                    <td><input type="checkbox" value="@(dr["pi_id"].ToString())" /></td>
+                    <td>@(((pages - 1) * pagesize + i).ToString())</td>
+                    <td><img class="detail-icon" onclick="step(@(dr["pi_id"].ToString()),@(dr["pq_id"].ToString()));" src="/images/arrow-right-y.png" /><span>@(dr["pi_order"].ToString())</span></td>
+                    <td>@dr["name"].ToString()</td>
+                    <td>@(dr["public_time"].ToString() != "" ? DateTime.Parse(dr["public_time"].ToString()).ToString("yyyy.MM.dd") :"")</td>
+                    <td>@(dr["end_time"].ToString() != "" ? DateTime.Parse(dr["end_time"].ToString()).ToString("yyyy.MM.dd") :"")</td>
+                    <td>@(dr["quote_status"] == DBNull.Value?"待报价":(XY.Enums.boss.Tools.purchase_quote_status((XY.Enums.boss.purchase_quote_status)dr["quote_status"])))</td>
+                </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @Html.Pager(XY.Http.RequestUrl(Context.Request), Model.OrderList)
+</div>

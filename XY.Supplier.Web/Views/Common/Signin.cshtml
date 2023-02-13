@@ -1,0 +1,208 @@
+﻿@model XY.Supplier.Web.Models.Common.Signin_Model
+
+@{
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+
+<script type="text/javascript">
+    require(['jquery', 'xyvalid'], function ($, v) {
+        $(function () {
+            var type = 'qrcode';
+            var timer = null;
+
+            var _form = $('form:first');
+            _form.xyvInit(true);
+
+            startTimer();
+            $("div.expireInfo").click(function () {
+                location.reload();
+            });
+
+            $('div.switchBar').click(function () {
+                if (type == 'qrcode') {
+                    $('#accoutTab').show();
+                    $('#qrcodeTab').hide();
+                    type = 'account';
+                    clearInterval(timer);
+                } else {
+                    $('#accoutTab').hide();
+                    $('#qrcodeTab').show();
+                    type = 'qrcode';
+                    startTimer();
+                }
+            });
+
+            function startTimer() {
+                timer = setInterval(function () {
+                    $.post('/common/Signin_Qr', { "guid": "@Model.Guid" }, function (res) {
+                        if (res != null) {
+                            if (res.data && res.success) {
+                                clearInterval(timer);
+                                location.reload();
+                            } else if (res.resultCode == "217") {//过期
+                                $("div.expireInfo").show();
+                            }
+                            else if (res.resultCode == "404") {
+                                clearInterval(timer);
+                                alert(res.errorMessage);
+                                location.reload();
+                            }
+                        }
+                    });
+                }, 1500);
+            }
+
+            //当前年份
+            var year_cur = new Date().getFullYear();
+            $('#year_cur').text(year_cur)
+
+        });
+    });
+</script>
+<style type="text/css">
+    body {
+        background-color: #F5F7FA !important;
+        line-height: normal;
+    }
+
+    .switchBar {
+        width: 52px;
+        height: 52px;
+        position: fixed;
+        left: 250px;
+        top: 10px;
+        cursor: pointer;
+        @*opacity: 0;*@
+    }
+
+    .qrcode-img {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+        .qrcode-img .mask {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            opacity: 0.7;
+            background: #000;
+        }
+
+    .login {
+        background-color: #ffffff;
+    }
+
+    .expireInfo {
+        position: absolute;
+        width: 160px;
+        height: 160px;
+    }
+
+        .expireInfo .txt {
+            position: absolute;
+            right: 0;
+            left: 0;
+            padding-top: 45%;
+            z-index: 10;
+            color: #fff;
+            font-size: 12px;
+            text-align: center;
+        }
+
+    .copyright {
+        position: fixed;
+        bottom: 40px;
+        width: 100%;
+        text-align: center;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .login_item .version {
+    }
+    .login_item .version .date-update {
+        font-size: 0.875rem;
+        opacity: 0.4;
+        font-weight: 400;
+    }
+    .logo_cr {
+        height: 0.6875rem;
+    }
+</style>
+
+@using (Html.BeginForm())
+{
+    <div class="login" id="accoutTab" style="display: none; flex: 1; border-radius: 5px;">
+        <div class="switchBar">
+            <img src="/images/qr.png" />
+        </div>
+        <div class="login_item tac fz1125r b" style="color:#000000">WMS<span class="version"> @XY.Supplier.Web.Tools.Version <span class="date-update">(@XY.Supplier.Web.Tools.VersionTime)</span></span></div>
+        @*<div class="login_item tac fz1125r b" style="color:#000000"><img src="/images/logo-login.png" /></div>*@
+        <div class="login_item">
+            <input type="text" id="Account" name="Account" value="@(Model.Account)" class="form-control w100p" maxlength="128" placeholder="账号"
+                   xy-required="true" xy-title="请输入帐号！" />
+        </div>
+        <div class="login_item">
+            <input type="password" id="Password" name="Password" class="form-control w100p" maxlength="16" placeholder="密码"
+                   xy-required="true" xy-pattern="^.{4,16}$" xy-title="请输入4-16位密码！" />
+        </div>
+        @if (Model.ImageCode != null && Model.ImageCode.Length > 0)
+        {
+            <div class="login_item">
+                <div class="fl">
+                    <input type="text" id="ImageCode" name="ImageCode" class="form-control" style="width:120px;" maxlength="5" placeholder="验证码"
+                           xy-required="true" xy-pattern="^[0-9]{5}$" xy-title="请输入正确的验证码！" />
+                </div>
+                <div class="fl pl10">
+                    <img src="/common/ImageCode" class="cp" id="image_code" title="看不清？点击更换" style="width:120px;height:38px;" />
+                </div>
+                <script type="text/javascript">
+                    require(['jquery', 'xy'], function ($, xy) {
+                        $(function () {
+
+                            //获取图片验证码
+                            $("#image_code").on("click", function () {
+                                $(this).attr("src", "/common/ImageCode?r=" + xy.random());
+                            });
+
+                        });
+                    });
+                </script>
+            </div>
+        }
+        <div class="login_item" style="margin-bottom:0px;font-size:14px;">
+            <button id="Submit" type="submit" class="btn btn-warning fl pl3r pr3r w100p white" style="background-color: #ffaa05;">
+                <span>登录</span>
+            </button>
+        </div>
+    </div>
+    <div id="qrcodeTab" class="login" style="border-radius: 5px;">
+        <div class="switchBar">
+            <img src="/images/pc.png" />
+        </div>
+        <div class="login_item tac fz1125r b" style="color:#000000">WMS<span class="version"> @XY.Supplier.Web.Tools.Version <span class="date-update">(@XY.Supplier.Web.Tools.VersionTime)</span></span></div>
+        @*<div class="login_item tac fz1125r b" style="color:#000000"><img src="/images/logo-login.png" /></div>*@
+        <div class="qrcode-img login_item">
+            <img id="qrcode" src=@Model.Qr style="width: 164px; height: 164px; " />
+            <div class="expireInfo" style="display:none">
+                <div class="txt">二维码失效，点击刷新</div>
+                <div class="mask"></div>
+            </div>
+        </div>
+        <div style="color: #000000; font-size: 0.875rem; text-align: center;" class="login_item">
+            请使用<b style="cursor: pointer;color: #ffaa05;" onclick="location.href='http://app.neware.work'">新威智能</b>扫描二维码登录
+        </div>
+    </div>
+    <div class="logo_login">
+        <img src="/images/logo.png" />
+    </div>
+    <div class="copyright">
+        <span>©&nbsp;&nbsp;</span><img class="ml3 mr3 logo_cr" src="/images/logo_word.png" />&nbsp;&nbsp;1998-<span id="year_cur"></span>
+    </div>
+}
